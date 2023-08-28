@@ -60,4 +60,3 @@ class Parser:
             print(f"{self.__class__.__qualname__}: {message}")
             print(code)
             print((" "*slice[0]) + ("^"*slice[1]))
-            exit(0)
