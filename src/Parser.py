@@ -39,7 +39,7 @@ class Parser:
             prev = next
             next = selectNext(tokenizer)
 
-            if prev.type == next.type:
+            if prev.type == next.type or prev.type != Token.types.NUMBER.name and next.type != Token.types.NUMBER.name:
                 raise Parser.ParseError(code, (tokenizer.position, 1), f"Invalid token at {tokenizer.position}. There couldn't be simultaneous tokens!")
             elif next.type == Token.types.EOS.name:
                 if prev.type != Token.types.NUMBER.name:
