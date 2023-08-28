@@ -35,7 +35,7 @@ class Tokenizer:
     def _skip_whitespaces(self):
         self.position += self._count_characters_from_position(string.whitespace)
 
-    def _count_characters_from_position(self, dictionary: T.LiteralString):
+    def _count_characters_from_position(self, dictionary: str):
         count = 0
 
         while self.position + count < len(self.source) and self.source[self.position + count] in dictionary:
