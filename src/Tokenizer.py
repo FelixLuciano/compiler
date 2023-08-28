@@ -11,21 +11,27 @@ class Tokenizer:
     position: int = field(init=False, default=0)
     next: Token = field(init=False, repr=False, default=None)
 
-    def selectNext(self):
+    def select_next(self, expect: T.Optional[Token.types] = None):
+        if expect is not None and self.next.type != expect:
+            raise ValueError(f"Expected {expect} and got {self.next.type} {self.source[self.position]} at {self.position}")
+
         self._skip_whitespaces()
 
         peek = self._peek_type()
+        value = 0
 
         if peek == Token.types.NUMBER:
-            value = self._tokenize_number()
-        elif peek == Token.types.PLUS:
-            value = 1
+            _digit_count = self._count_characters_from_position(string.digits)
+            print(self.position, _digit_count, self.source[self.position:self.position+_digit_count])
+            value = int(self.source[self.position:self.position+_digit_count])
+            self.position += _digit_count
+        elif peek in (
+            Token.types.PLUS,
+            Token.types.MINUS,
+            Token.types.MULT,
+            Token.types.DIV,
+        ):
             self.position += 1
-        elif peek == Token.types.MINUS:
-            value = -1
-            self.position += 1
-        else:
-            value = peek.value
 
         token = self.next
         self.next = Token(peek.name, value)
@@ -36,12 +42,11 @@ class Tokenizer:
         self.position += self._count_characters_from_position(string.whitespace)
 
     def _count_characters_from_position(self, dictionary: T.LiteralString):
-        count = 0
+        for position in range(self.position, len(self.source)):
+            if self.source[position] not in dictionary:
+                break
 
-        while self.position + count < len(self.source) and self.source[self.position + count] in dictionary:
-            count += 1
-
-        return count
+        return position - self.position
 
     def _peek_type(self):
         try:
@@ -49,12 +54,5 @@ class Tokenizer:
         except IndexError:
             return Token.types.EOS
 
-    def _tokenize_number(self):
-        digit_count = self._count_characters_from_position(string.digits)
-        value_input = self.source[self.position:self.position+digit_count]
-        self.position += digit_count
-
-        return int(value_input)
-
     def __post_init__(self):
-        self.selectNext()
+        self.select_next()

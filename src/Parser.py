@@ -8,56 +8,42 @@ from src.Tokenizer import Tokenizer
 class Parser:
     tokenizer: Tokenizer = field()
 
-    def parseExpression():
-        pass
+    def parse_expression(self) -> int:
+        answer = self.parse_term()
 
-    @staticmethod
-    def run(code: str):
-        def initialize_tokenizer():
-            try:
-                tokenizer = Tokenizer(code)
-
-                if tokenizer.next.type != Token.types.NUMBER.name:
-                    raise Parser.ParseError(code, (0, 1), f"Invalid token at {tokenizer.position}. {tokenizer.next.type} is not an valid initializer!")
-            
-                return tokenizer
-            except AttributeError as error:
-                raise Parser.ParseError(code, (0, 1), f"Invalid token at 0. {error.args[0]}")
-            
-        def selectNext(tokenizer: Tokenizer):
-            try:
-                return tokenizer.selectNext()
-            except AttributeError as error:
-                raise Parser.ParseError(code, (1, 1), f"Invalid token at 1. {error.args[0]}")
-
-        tokenizer = initialize_tokenizer()
-        next = selectNext(tokenizer)
-
-        answer = next.value
+        print(True, answer)
 
         while True:
-            prev = next
-            next = selectNext(tokenizer)
-
-            if prev.type == next.type:
-                raise Parser.ParseError(code, (tokenizer.position, 1), f"Invalid token at {tokenizer.position}. There couldn't be simultaneous tokens!")
-            elif next.type == Token.types.EOS.name:
-                if prev.type != Token.types.NUMBER.name:
-                    raise Parser.ParseError(code, (tokenizer.position, 1), f"Expected a {Token.types.NUMBER.name} after a {prev.type} at {tokenizer.position}!")
+            try:
+                self.tokenizer.select_next(Token.types.PLUS)
+                answer += self.parse_term()
+            except ValueError:
+                self.tokenizer.select_next(Token.types.MINUS)
+                answer -= self.parse_term()
+            except ValueError:
+                self.tokenizer.select_next(Token.types.EOF)
                 break
-            elif next.type == Token.types.NUMBER.name:
-                if prev.type == Token.types.PLUS.name:
-                    answer += next.value
-                elif prev.type == Token.types.MINUS.name:
-                    answer -= next.value
-                else:
-                    raise Parser.ParseError(code, (tokenizer.position, 1), f"Invalid operation at {tokenizer.position}")
+            except:
+                print("AAAAAAAaaa")
 
         return answer
-    
-    class ParseError(Exception):
-        def __init__(self, code: str, slice, message: str):
-            print(f"{self.__class__.__qualname__}: {message}")
-            print(code)
-            print((" "*slice[0]) + ("^"*slice[1]))
-            exit(0)
+
+    def parse_term(self) -> int:
+        answer = self.tokenize.select_next(Token.types.NUMBER.name).value
+
+        while True:
+            try:
+                self.tokenizer.select_next(Token.types.MULT)
+                answer *= self.tokenizer.select_next(Token.types.NUMBER).value
+            except ValueError:
+                self.tokenizer.select_next(Token.types.DIV)
+                answer //= self.tokenizer.select_next(Token.types.NUMBER).value
+            except Exception:
+                break
+
+        return answer
+
+    @staticmethod
+    def run(code: str) -> int:
+        return Parser(Tokenizer(code)).parse_expression()
+

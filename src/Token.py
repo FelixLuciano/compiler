@@ -10,10 +10,12 @@ class Token:
 
     class types(Enum):
         LAMBDA = None
-        EOS = auto()
+        EOF = auto()
         NUMBER = auto()
         PLUS = auto()
         MINUS = auto()
+        MULT = auto()
+        DIV = auto()
 
         @classmethod
         def get(cls, value: str):
@@ -23,5 +25,9 @@ class Token:
                 return cls.PLUS
             elif value == "-":
                 return cls.MINUS
+            elif value == "*":
+                return cls.MULT
+            elif value == "/":
+                return cls.DIV
             
-            raise AttributeError(f"\"{value}\" is not valid!")
+            raise ValueError(f"\"{value}\" is not a valid token!")
