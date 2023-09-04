@@ -10,6 +10,6 @@ def main(args: argparse.Namespace):
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
 
-    args.add_argument("expression", help="Sum expression. Eg.: \"1 + 1\"")
+    args.add_argument("expression", help='Sum expression. Eg.: "1 + 1"')
 
     main(args.parse_args())

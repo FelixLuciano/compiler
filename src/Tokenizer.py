@@ -1,5 +1,4 @@
 import typing as T
-import string
 from dataclasses import dataclass, field
 
 from src.Token import Token
@@ -8,53 +7,65 @@ from src.Token import Token
 @dataclass
 class Tokenizer:
     source: str = field()
-    position: int = field(init=False, default=0)
-    next: Token = field(init=False, repr=False, default=None)
+    position: int = field(default=-1)
+    next: Token = field(init=False, default_factory=lambda: Token.LAMBDA)
 
-    def selectNext(self):
-        self._skip_whitespaces()
+    @property
+    def current(self):
+        return self.get(self.position)
 
-        peek = self._peek_type()
-
-        if peek == Token.types.NUMBER:
-            value = self._tokenize_number()
-        elif peek == Token.types.PLUS:
-            value = 1
-            self.position += 1
-        elif peek == Token.types.MINUS:
-            value = -1
-            self.position += 1
-        else:
-            value = peek.value
-
-        token = self.next
-        self.next = Token(peek.name, value)
-
-        return token
-
-    def _skip_whitespaces(self):
-        self.position += self._count_characters_from_position(string.whitespace)
-
-    def _count_characters_from_position(self, dictionary: str):
-        count = 0
-
-        while self.position + count < len(self.source) and self.source[self.position + count] in dictionary:
-            count += 1
-
-        return count
-
-    def _peek_type(self):
+    def get(self, index):
         try:
-            return Token.types.get(self.source[self.position])
+            return self.source[index]
         except IndexError:
-            return Token.types.EOS
+            return "\0"
 
-    def _tokenize_number(self):
-        digit_count = self._count_characters_from_position(string.digits)
-        value_input = self.source[self.position:self.position+digit_count]
-        self.position += digit_count
+    def select_next(self):
+        type_ = Token.types.LAMBDA
+        value = 0
 
-        return int(value_input)
+        while True:
+            next = self.get(self.position + 1)
+            peek = Token.types.get(next)
 
-    def __post_init__(self):
-        self.selectNext()
+            if peek == Token.types.SPACE:
+                pass
+            if type_ == Token.types.LAMBDA:
+                type_ = peek
+            elif peek is None:
+                raise ValueError(f"Invalid token {next} at {self.position}!")
+            elif type_ != peek and peek != Token.types.SPACE:
+                break
+
+            if peek == Token.types.EOF:
+                self.position = len(self.source)
+                self.next = Token.EOF
+                return
+            elif peek == Token.types.SPACE:
+                pass
+            elif peek == Token.types.DIGIT:
+                value = int(next) + value * 10
+            elif peek in (
+                Token.types.PLUS,
+                Token.types.MINUS,
+                Token.types.MULT,
+                Token.types.DIV,
+            ):
+                pass
+            else:
+                raise ValueError(
+                    f'Unexpected token {peek.name} "{next}" at {self.position}!'
+                )
+
+            self.position += 1
+
+            if peek not in Token.types.CHAINING_TYPES:
+                break
+
+        self.next = Token(type_.name, value)
+
+    def assert_type(self, type: Token.types):
+        if not self.next.check(type):
+            raise ValueError(
+                f"Expected token {type.name} and got {self.next.type} at {self.position}!"
+            )
