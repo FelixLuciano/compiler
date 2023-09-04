@@ -50,14 +50,7 @@ class Tokenizer:
                 return
             elif peek == Token.types.DIGIT:
                 value = int(next) + value * 10
-            elif peek in (
-                Token.types.PLUS,
-                Token.types.MINUS,
-                Token.types.MULT,
-                Token.types.DIV,
-            ):
-                pass
-            else:
+            elif peek is None:
                 raise ValueError(
                     f'Unexpected token {peek.name} "{next}" at {self.position}!'
                 )
