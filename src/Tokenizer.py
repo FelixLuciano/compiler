@@ -30,7 +30,7 @@ class Tokenizer:
 
             if peek == Token.types.SPACE:
                 pass
-            if type_ == Token.types.LAMBDA:
+            elif type_ == Token.types.LAMBDA:
                 type_ = peek
             elif peek is None:
                 raise ValueError(f"Invalid token {next} at {self.position}!")
