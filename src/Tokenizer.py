@@ -1,5 +1,4 @@
 import typing as T
-import string
 from dataclasses import dataclass, field
 
 from src.Token import Token
@@ -8,51 +7,62 @@ from src.Token import Token
 @dataclass
 class Tokenizer:
     source: str = field()
-    position: int = field(init=False, default=0)
-    next: Token = field(init=False, repr=False, default=None)
+    position: int = field(default=-1)
+    next: Token = field(init=False, default_factory=lambda: Token.LAMBDA)
 
-    def select_next(self, expect: T.Optional[Token.types] = None):
-        if expect is not None and self.next.type != expect:
-            raise ValueError(f"Expected {expect} and got {self.next.type} {self.source[self.position]} at {self.position}")
+    @property
+    def current(self):
+        return self.get(self.position)
 
-        self._skip_whitespaces()
+    def get(self, index):
+        try:
+            return self.source[index]
+        except IndexError:
+            return "\0"
 
-        peek = self._peek_type()
+    def select_next(self):
+        type_ = Token.types.LAMBDA
         value = 0
 
-        if peek == Token.types.NUMBER:
-            _digit_count = self._count_characters_from_position(string.digits)
-            print(self.position, _digit_count, self.source[self.position:self.position+_digit_count])
-            value = int(self.source[self.position:self.position+_digit_count])
-            self.position += _digit_count
-        elif peek in (
-            Token.types.PLUS,
-            Token.types.MINUS,
-            Token.types.MULT,
-            Token.types.DIV,
-        ):
-            self.position += 1
+        while True:
+            next = self.get(self.position + 1)
+            peek = Token.types.get(next)
 
-        token = self.next
-        self.next = Token(peek.name, value)
-
-        return token
-
-    def _skip_whitespaces(self):
-        self.position += self._count_characters_from_position(string.whitespace)
-
-    def _count_characters_from_position(self, dictionary: T.LiteralString):
-        for position in range(self.position, len(self.source)):
-            if self.source[position] not in dictionary:
+            if type_ == Token.types.LAMBDA and peek != Token.types.SPACE:
+                type_ = peek
+            elif peek is None:
+                raise ValueError(f"Invalid token {next} at {self.position}!")
+            elif type_ != peek:
                 break
 
-        return position - self.position
+            if peek == Token.types.EOF:
+                self.position = len(self.source)
+                break
+            elif peek == Token.types.SPACE:
+                pass
+            elif peek == Token.types.DIGIT:
+                value = int(next) + value * 10
+            elif peek in (
+                Token.types.PLUS,
+                Token.types.MINUS,
+                Token.types.MULT,
+                Token.types.DIV,
+            ):
+                pass
+            else:
+                raise ValueError(
+                    f'Unexpected token {peek.name} "{next}" at {self.position}!'
+                )
 
-    def _peek_type(self):
-        try:
-            return Token.types.get(self.source[self.position])
-        except IndexError:
-            return Token.types.EOS
+            self.position += 1
 
-    def __post_init__(self):
-        self.select_next()
+            if peek in Token.types.CHAINING_TYPES:
+                break
+
+        self.next = Token(type_.name, value)
+
+    def assert_type(self, type: Token.types):
+        if not self.next.check(type):
+            raise ValueError(
+                f"Expected token {type.name} and got {self.next.type} at {self.position}!"
+            )
