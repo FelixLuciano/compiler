@@ -28,21 +28,26 @@ class Tokenizer:
             next = self.get(self.position + 1)
             peek = Token.types.get(next)
 
-            if peek == Token.types.SPACE:
-                pass
-            elif type_ == Token.types.LAMBDA:
+            if peek != Token.types.SPACE:
+                break
+            else:
+                self.position += 1
+
+        while True:
+            next = self.get(self.position + 1)
+            peek = Token.types.get(next)
+
+            if type_ == Token.types.LAMBDA:
                 type_ = peek
             elif peek is None:
                 raise ValueError(f"Invalid token {next} at {self.position}!")
-            elif type_ != peek and peek != Token.types.SPACE:
+            elif type_ != peek:
                 break
 
             if peek == Token.types.EOF:
                 self.position = len(self.source)
                 self.next = Token.EOF
                 return
-            elif peek == Token.types.SPACE:
-                pass
             elif peek == Token.types.DIGIT:
                 value = int(next) + value * 10
             elif peek in (
