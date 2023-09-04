@@ -20,6 +20,8 @@ class Token:
         MINUS = auto()
         MULT = auto()
         DIV = auto()
+        OPEN_PARENTHESIS = auto()
+        CLOSE_PARENTHESIS = auto()
         EOF = auto()
 
         CHAINING_TYPES: T.Tuple["Token.types"]
@@ -40,6 +42,10 @@ class Token:
                 return cls.MULT
             elif value == "/":
                 return cls.DIV
+            elif value == "(":
+                return cls.OPEN_PARENTHESIS
+            elif value == ")":
+                return cls.CLOSE_PARENTHESIS
             elif value == "\0":
                 return cls.EOF
             else:
