@@ -31,19 +31,7 @@ class Parser:
         return answer
 
     def parse_term(self) -> int:
-        answer = 0
-
-        while self.tokenizer.next == Token.LAMBDA:
-            self.tokenizer.select_next()
-
-        if self.tokenizer.next.check(Token.types.DIGIT):
-            answer = self.tokenizer.next.value
-        else:
-            raise ValueError(
-                f"Unexpected token {self.tokenizer.next.type} at {self.tokenizer.position}!"
-            )
-
-        self.tokenizer.select_next()
+        answer = self.parse_factor()
 
         while True:
             if self.tokenizer.next.check(Token.types.MULT):
@@ -55,19 +43,44 @@ class Parser:
 
             self.tokenizer.select_next()
 
-            if self.tokenizer.next.check(Token.types.DIGIT):
-                if operator == Token.types.MULT:
-                    answer *= self.tokenizer.next.value
-                elif operator == Token.types.DIV:
-                    answer //= self.tokenizer.next.value
-            else:
-                raise ValueError(
-                    f"Unexpected token {self.tokenizer.next.type} at {self.tokenizer.position}!"
-                )
-
-            self.tokenizer.select_next()
+            if operator == Token.types.MULT:
+                answer *= self.parse_factor()
+            elif operator == Token.types.DIV:
+                answer //= self.parse_factor()
 
         return answer
+    
+    def parse_factor(self):
+        while self.tokenizer.next == Token.LAMBDA:
+            self.tokenizer.select_next()
+
+        if self.tokenizer.next.check(Token.types.DIGIT):
+            answer = self.tokenizer.next.value
+            
+            self.tokenizer.select_next()
+
+            return answer
+        elif self.tokenizer.next.check(Token.types.PLUS):
+            return self.parse_factor()
+        elif self.tokenizer.next.check(Token.types.MINUS):
+            return self.parse_factor() * -1
+        elif self.tokenizer.next.check(Token.types.OPEN_PARENTHESIS):
+            self.tokenizer.select_next()
+
+            answer = self.parse_expression()
+
+            if self.tokenizer.next.check(Token.types.CLOSE_PARENTHESIS):
+                self.tokenizer.select_next()
+
+                return answer
+            else:
+                raise ValueError(
+                    f"Expected close parenthesis at {self.tokenizer.position}!"
+                )
+        else:
+            raise ValueError(
+                f"Unexpected token {self.tokenizer.next.type} at {self.tokenizer.position}!"
+            )
 
     @staticmethod
     def run(code: str) -> int:
