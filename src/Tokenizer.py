@@ -28,16 +28,19 @@ class Tokenizer:
             next = self.get(self.position + 1)
             peek = Token.types.get(next)
 
-            if type_ == Token.types.LAMBDA and peek != Token.types.SPACE:
+            if peek == Token.types.SPACE:
+                pass
+            if type_ == Token.types.LAMBDA:
                 type_ = peek
             elif peek is None:
                 raise ValueError(f"Invalid token {next} at {self.position}!")
-            elif type_ != peek:
+            elif type_ != peek and peek != Token.types.SPACE:
                 break
 
             if peek == Token.types.EOF:
                 self.position = len(self.source)
-                break
+                self.next = Token.EOF
+                return
             elif peek == Token.types.SPACE:
                 pass
             elif peek == Token.types.DIGIT:
@@ -56,7 +59,7 @@ class Tokenizer:
 
             self.position += 1
 
-            if peek in Token.types.CHAINING_TYPES:
+            if peek not in Token.types.CHAINING_TYPES:
                 break
 
         self.next = Token(type_.name, value)
