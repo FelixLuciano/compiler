@@ -1,4 +1,4 @@
-[Raul Ikeda Gomes da Silva](http://lattes.cnpq.br/5935139039430914). Lógica de Compuação. [Insper](https:++github.com+Insper), 2023.
+[Raul Ikeda Gomes da Silva](http://lattes.cnpq.br/5935139039430914). Lógica de Computação. [Insper](https://github.com/Insper), 2023.
 
 # compiler
 
