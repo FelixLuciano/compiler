@@ -61,8 +61,10 @@ class Parser:
 
             return answer
         elif self.tokenizer.next.check(Token.types.PLUS):
+            self.tokenizer.select_next()
             return self.parse_factor()
         elif self.tokenizer.next.check(Token.types.MINUS):
+            self.tokenizer.select_next()
             return self.parse_factor() * -1
         elif self.tokenizer.next.check(Token.types.OPEN_PARENTHESIS):
             self.tokenizer.select_next()
