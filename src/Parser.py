@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 from src.Token import Token
+from src.Pre_processing import Pre_processing
 from src.Tokenizer import Tokenizer
 from src.Abstract_node import Abstract_node
 from src.Integer_value_node import Integer_value_node
@@ -88,8 +89,8 @@ class Parser:
             )
 
     @staticmethod
-    def run(code: str) -> Abstract_node:
-        parser = Parser(Tokenizer(code))
+    def run(code: str) -> Abstract_node: 
+        parser = Parser(Tokenizer(Pre_processing.filter(code)))
         answer = parser.parse_expression()
 
         if parser.tokenizer.next != Token.EOF:
