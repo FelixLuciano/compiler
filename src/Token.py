@@ -6,57 +6,62 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Token:
-    type: str = field()
-    value: int = field()
+    type: "types" = field()
+    value: str = field()
 
-    LAMBDA: "Token" = field(init=False, repr=False)
-    EOF: "Token" = field(init=False, repr=False)
+    CHAINING_TOKENS: T.Set["types"] = field(init=False, repr=False)
 
     class types(Enum):
         LAMBDA = auto()
         SPACE = auto()
-        DIGIT = auto()
-        PLUS = auto()
-        MINUS = auto()
-        MULT = auto()
-        DIV = auto()
+        END_OF_LINE = auto()
+        END_OF_FILE = auto()
+        NUMBER = auto()
+        IDENTIFIER = auto()
+        ASSIGNMENT = auto()
+        OP_PLUS = auto()
+        OP_MINUS = auto()
+        OP_MULT = auto()
+        OP_DIV = auto()
         OPEN_PARENTHESIS = auto()
         CLOSE_PARENTHESIS = auto()
-        EOF = auto()
-
-        CHAINING_TYPES: T.Tuple["Token.types"]
+        SEPARATOR = auto()
 
         @classmethod
         def get(cls, value: str):
             if len(value) == 0:
                 return cls.LAMBDA
+            elif value == "\n":
+                return cls.END_OF_LINE
             if value in string.whitespace:
                 return cls.SPACE
             if value in string.digits:
-                return cls.DIGIT
+                return cls.NUMBER
+            if value in string.ascii_letters:
+                return cls.IDENTIFIER
+            if value == "=":
+                return cls.ASSIGNMENT
             elif value == "+":
-                return cls.PLUS
+                return cls.OP_PLUS
             elif value == "-":
-                return cls.MINUS
+                return cls.OP_MINUS
             elif value == "*":
-                return cls.MULT
+                return cls.OP_MULT
             elif value == "/":
-                return cls.DIV
+                return cls.OP_DIV
             elif value == "(":
                 return cls.OPEN_PARENTHESIS
             elif value == ")":
                 return cls.CLOSE_PARENTHESIS
-            elif value == "\0":
-                return cls.EOF
+            elif value == ",":
+                return cls.SEPARATOR
             else:
                 return None
 
     def check(self, type: types):
-        return self.type == type.name
+        return self.type == type
 
 
-Token.LAMBDA = Token(Token.types.LAMBDA.name, None)
-Token.EOF = Token(Token.types.EOF.name, None)
-Token.types.CHAINING_TYPES = (Token.types.SPACE, Token.types.DIGIT)
-
-Token.types.CHAINING_TYPES
+LAMBDA = Token(Token.types.LAMBDA, "")
+END_OF_FILE = Token(Token.types.END_OF_FILE, "")
+Token.CHAINING_TOKENS = set((Token.types.SPACE, Token.types.NUMBER, Token.types.IDENTIFIER))
