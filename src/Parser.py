@@ -4,33 +4,102 @@ from src.Token import Token
 from src.Pre_processing import Pre_processing
 from src.Tokenizer import Tokenizer
 from src.Abstract_node import Abstract_node
+from src.Block_node import Block_node
+from src.No_operation_node import No_operation_node
 from src.Integer_value_node import Integer_value_node
 from src.Unary_operation_node import Unary_operation_node
 from src.Binary_operation_node import Binary_operation_node
+from src.Identifier_assignment_node import Identifier_assignment_node
+from src.Identifier_call_node import Identifier_call_node
+
 
 @dataclass
 class Parser:
     tokenizer: Tokenizer = field()
 
+    @staticmethod
+    def run(code: str) -> Abstract_node: 
+        tokenizer = Tokenizer(Pre_processing.filter(code))
+
+        tokenizer.select_next()
+    
+        parser = Parser(tokenizer)
+        answer = parser.parse_block()
+
+        if tokenizer.next.type != Token.types.END_OF_FILE:
+            print(answer)
+            print(True, tokenizer.next)
+            raise ValueError(f'Invalid expression "{code}"')
+
+        return answer
+
+    def parse_block(self) -> Block_node:
+        statements = []
+
+        while not self._check_next_for(Token.types.END_OF_FILE):
+            statement = self.parse_statement()
+
+            statements.append(statement)
+
+        return Block_node(None, statements)
+
+    def parse_statement(self):
+        statement = No_operation_node
+
+        if self._check_next_for(Token.types.IDENTIFIER):
+            identifier = self.tokenizer.next
+
+            self._consume_token()
+
+            if self._check_next_for(Token.types.ASSIGNMENT):
+                self._consume_token()
+
+                statement = Identifier_assignment_node(identifier.value, [self.parse_expression()])
+            elif self._check_next_for(Token.types.OPEN_PARENTHESIS):
+                self._consume_token()
+
+                arguments = []
+
+                while not self._check_next_for(Token.types.CLOSE_PARENTHESIS):
+                    expression = self.parse_expression()
+
+                    if self._check_next_for(Token.types.SEPARATOR):
+                        self._consume_token()
+                    elif self._check_next_for(Token.types.END_OF_LINE):
+                        raise ValueError(
+                            f"Expected , or ) after expression at {self.tokenizer.position}!"
+                        )
+
+                    arguments.append(expression)
+
+                self._consume_token()
+        
+                statement = Identifier_call_node(identifier.value, arguments)
+
+        if self._check_next_for(Token.types.END_OF_LINE):
+            self._consume_token()
+
+        return statement
+
     def parse_expression(self) -> Abstract_node:
         root = self.parse_term()
 
         while True:
-            if self.tokenizer.next.check(Token.types.PLUS):
-                operator = Token.types.PLUS
-            elif self.tokenizer.next.check(Token.types.MINUS):
-                operator = Token.types.MINUS
+            if self._check_next_for(Token.types.OP_PLUS):
+                operator = Token.types.OP_PLUS
+            elif self._check_next_for(Token.types.OP_MINUS):
+                operator = Token.types.OP_MINUS
             else:
                 break
 
-            self.tokenizer.select_next()
+            self._consume_token()
 
             next = self.parse_term()
 
-            if operator == Token.types.PLUS:
-                root = Binary_operation_node(Token.types.PLUS, [root, next])
-            elif operator == Token.types.MINUS:
-                root = Binary_operation_node(Token.types.MINUS, [root, next])
+            if operator == Token.types.OP_PLUS:
+                root = Binary_operation_node(Token.types.OP_PLUS, [root, next])
+            elif operator == Token.types.OP_MINUS:
+                root = Binary_operation_node(Token.types.OP_MINUS, [root, next])
 
         return root
 
@@ -38,63 +107,51 @@ class Parser:
         root = self.parse_factor()
 
         while True:
-            if self.tokenizer.next.check(Token.types.MULT):
-                operator = Token.types.MULT
-            elif self.tokenizer.next.check(Token.types.DIV):
-                operator = Token.types.DIV
+            if self._check_next_for(Token.types.OP_MULT):
+                operator = Token.types.OP_MULT
+            elif self._check_next_for(Token.types.OP_DIV):
+                operator = Token.types.OP_DIV
             else:
                 break
 
-            self.tokenizer.select_next()
+            self._consume_token()
 
-            if operator == Token.types.MULT:
-                root = Binary_operation_node(Token.types.MULT, [root, self.parse_factor()])
-            elif operator == Token.types.DIV:
-                root = Binary_operation_node(Token.types.DIV, [root, self.parse_factor()])
+            if operator == Token.types.OP_MULT:
+                root = Binary_operation_node(Token.types.OP_MULT, [root, self.parse_factor()])
+            elif operator == Token.types.OP_DIV:
+                root = Binary_operation_node(Token.types.OP_DIV, [root, self.parse_factor()])
 
         return root
     
     def parse_factor(self):
-        while self.tokenizer.next == Token.LAMBDA:
-            self.tokenizer.select_next()
-
-        if self.tokenizer.next.check(Token.types.DIGIT):
+        if self._check_next_for(Token.types.NUMBER):
             value = self.tokenizer.next.value
             
-            self.tokenizer.select_next()
+            self._consume_token()
 
             return Integer_value_node(value)
-        elif self.tokenizer.next.check(Token.types.PLUS):
-            self.tokenizer.select_next()
-            return Unary_operation_node(Token.types.PLUS, [self.parse_factor()])
-        elif self.tokenizer.next.check(Token.types.MINUS):
-            self.tokenizer.select_next()
-            return Unary_operation_node(Token.types.MINUS, [self.parse_factor()])
-        elif self.tokenizer.next.check(Token.types.OPEN_PARENTHESIS):
-            self.tokenizer.select_next()
+        elif self._check_next_for(Token.types.OP_PLUS):
+            self._consume_token()
+            return Unary_operation_node(Token.types.OP_PLUS, [self.parse_factor()])
+        elif self._check_next_for(Token.types.OP_MINUS):
+            self._consume_token()
+            return Unary_operation_node(Token.types.OP_MINUS, [self.parse_factor()])
+        elif self._check_next_for(Token.types.OPEN_PARENTHESIS):
+            self._consume_token()
 
             expression = self.parse_expression()
 
-            if self.tokenizer.next.check(Token.types.CLOSE_PARENTHESIS):
-                self.tokenizer.select_next()
+            if self._check_next_for(Token.types.CLOSE_PARENTHESIS):
+                self._consume_token()
 
                 return expression
             else:
                 raise ValueError(
-                    f"Expected close parenthesis at {self.tokenizer.position}!"
+                    f"Expected ) after expression at {self.tokenizer.position}!"
                 )
-        else:
-            raise ValueError(
-                f"Unexpected token {self.tokenizer.next.type} at {self.tokenizer.position}!"
-            )
-
-    @staticmethod
-    def run(code: str) -> Abstract_node: 
-        parser = Parser(Tokenizer(Pre_processing.filter(code)))
-        answer = parser.parse_expression()
-
-        if parser.tokenizer.next != Token.EOF:
-            print(answer, parser.tokenizer.next)
-            raise ValueError(f'Invalid expression "{code}"')
-
-        return answer
+    
+    def _check_next_for(self, type_: Token.types):
+        return self.tokenizer.next.check(type_)
+    
+    def _consume_token(self):
+        return self.tokenizer.select_next()
