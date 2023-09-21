@@ -6,13 +6,13 @@ class Binary_operation_node(Abstract_node):
     value : Token.types
 
     def evaluate(self) -> int:
-        if self.value == Token.types.PLUS:
+        if self.value == Token.types.OP_PLUS:
             return self.children[0].evaluate() + self.children[1].evaluate()
-        elif self.value == Token.types.MINUS:
+        elif self.value == Token.types.OP_MINUS:
             return self.children[0].evaluate() - self.children[1].evaluate()
-        elif self.value == Token.types.MULT:
+        elif self.value == Token.types.OP_MULT:
             return self.children[0].evaluate() * self.children[1].evaluate()
-        elif self.value == Token.types.DIV:
+        elif self.value == Token.types.OP_DIV:
             return self.children[0].evaluate() // self.children[1].evaluate()
     
         raise ValueError(f"{self.value} is not an Valid operation!")
