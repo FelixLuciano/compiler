@@ -10,6 +10,7 @@ from src.Integer_value_node import Integer_value_node
 from src.Unary_operation_node import Unary_operation_node
 from src.Binary_operation_node import Binary_operation_node
 from src.Identifier_assignment_node import Identifier_assignment_node
+from src.Identifier_reference_node import Identifier_reference_node
 from src.Identifier_call_node import Identifier_call_node
 
 
@@ -27,8 +28,6 @@ class Parser:
         answer = parser.parse_block()
 
         if tokenizer.next.type != Token.types.END_OF_FILE:
-            print(answer)
-            print(True, tokenizer.next)
             raise ValueError(f'Invalid expression "{code}"')
 
         return answer
@@ -130,6 +129,12 @@ class Parser:
             self._consume_token()
 
             return Integer_value_node(value)
+        if self._check_next_for(Token.types.IDENTIFIER):
+            value = self.tokenizer.next.value
+            
+            self._consume_token()
+
+            return Identifier_reference_node(value)
         elif self._check_next_for(Token.types.OP_PLUS):
             self._consume_token()
             return Unary_operation_node(Token.types.OP_PLUS, [self.parse_factor()])
