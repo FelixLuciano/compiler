@@ -6,4 +6,4 @@ class Integer_value_node(Abstract_node):
     value : int
 
     def evaluate(self) -> int:
-        return self.value
+        return int(self.value)
