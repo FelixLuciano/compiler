@@ -1,4 +1,7 @@
 class Pre_processing:
     @staticmethod
     def filter(code: str):
-        return code[:code.index("//")]
+        try:
+            return code[:code.index("//")]
+        except ValueError:
+            return code
