@@ -2,7 +2,7 @@ import typing as T
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 
-from src.Token import Token
+from src.SymbolTable import SymbolTable
 
 
 @dataclass
@@ -11,5 +11,5 @@ class Abstract_node(ABC):
     children: T.List["Abstract_node"] = field(default_factory=list)
 
     @abstractmethod
-    def evaluate(self) -> int:
+    def evaluate(self, context: SymbolTable) -> int:
         pass
