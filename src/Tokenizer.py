@@ -1,69 +1,58 @@
 import typing as T
 from dataclasses import dataclass, field
 
-from src.Token import Token
+from src.Token import Token, LAMBDA, END_OF_FILE
 
 
 @dataclass
 class Tokenizer:
     source: str = field()
     position: int = field(default=-1)
-    next: Token = field(init=False, default_factory=lambda: Token.LAMBDA)
-
-    @property
-    def current(self):
-        return self.get(self.position)
+    next: Token = field(init=False, default_factory=lambda: LAMBDA)
 
     def get(self, index):
         try:
             return self.source[index]
         except IndexError:
-            return "\0"
+            return "\n"
 
     def select_next(self):
-        type_ = Token.types.LAMBDA
-        value = 0
+        index = self.position
+        state = Token.types.LAMBDA
+        stack = []
 
-        while True:
-            next = self.get(self.position + 1)
-            peek = Token.types.get(next)
+        if index > len(self.source):
+            self.next = END_OF_FILE
+            return
 
-            if peek != Token.types.SPACE:
-                break
+        for index in range(self.position, len(self.source) + 1):
+            next = self.get(index)
+            next_state = Token.types.get(next)
+
+            if state == Token.types.IDENTIFIER and next_state == Token.types.NUMBER:
+                next_state = state
+
+            if state == Token.types.LAMBDA:
+                if next_state is not None:
+                    if next_state != Token.types.SPACE:
+                        state = next_state
+                    else:
+                        continue
+                else:
+                    raise ValueError(f"Invalid token {next} at {self.position}-{index}!")
+            if state == next_state:
+                stack.append(next)
+
+                if state not in Token.CHAINING_TOKENS:
+                    index += 1
             else:
-                self.position += 1
-
-        while True:
-            next = self.get(self.position + 1)
-            peek = Token.types.get(next)
-
-            if type_ == Token.types.LAMBDA:
-                type_ = peek
-            elif peek is None:
-                raise ValueError(f"Invalid token {next} at {self.position}!")
-            elif type_ != peek:
                 break
 
-            if peek == Token.types.EOF:
-                self.position = len(self.source)
-                self.next = Token.EOF
-                return
-            elif peek == Token.types.DIGIT:
-                value = int(next) + value * 10
-            elif peek is None:
-                raise ValueError(
-                    f'Unexpected token {peek.name} "{next}" at {self.position}!'
-                )
-
-            self.position += 1
-
-            if peek not in Token.types.CHAINING_TYPES:
-                break
-
-        self.next = Token(type_.name, value)
+        self.position = index
+        self.next = Token(state, "".join(stack))
 
     def assert_type(self, type: Token.types):
         if not self.next.check(type):
             raise ValueError(
-                f"Expected token {type.name} and got {self.next.type} at {self.position}!"
+                f"Expected token {type.name} and got {self.next.type.name} at {self.position}!"
             )
