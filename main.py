@@ -1,6 +1,7 @@
 import argparse
 
 from src.Parser import Parser
+from src.SymbolTable import SymbolTable
 
 
 def main(args: argparse.Namespace):
@@ -8,8 +9,9 @@ def main(args: argparse.Namespace):
         code = entry.read()
 
     expression = Parser.run(code)
+    context = SymbolTable()
 
-    print(expression.evaluate())
+    expression.evaluate(context)
 
 
 if __name__ == "__main__":
