@@ -75,8 +75,12 @@ class Parser:
         
                 statement = Identifier_call_node(identifier.value, arguments)
 
-        if self._check_next_for(Token.types.END_OF_LINE):
-            self._consume_token()
+        if not self._check_next_for(Token.types.END_OF_LINE):
+            raise ValueError(
+                f"Expected new line after statement at {self.tokenizer.position}!"
+            )
+        
+        self._consume_token()
 
         return statement
 
@@ -159,4 +163,5 @@ class Parser:
         return self.tokenizer.next.check(type_)
     
     def _consume_token(self):
+        print("CONSUME", self.tokenizer.next.type.name)
         return self.tokenizer.select_next()
