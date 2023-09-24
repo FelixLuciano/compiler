@@ -21,7 +21,7 @@ class Tokenizer:
         state = Token.types.LAMBDA
         stack = []
 
-        if index > len(self.source):
+        if index >= len(self.source):
             self.next = END_OF_FILE
             return
 
@@ -29,24 +29,24 @@ class Tokenizer:
             next = self.get(index)
             next_state = Token.types.get(next)
 
-            if state == Token.types.IDENTIFIER and next_state == Token.types.NUMBER:
+            if next_state is None:
+                raise ValueError(f"Invalid token {next} at {self.position}!")
+            elif next_state == Token.types.SPACE:
+                continue
+            elif state == Token.types.LAMBDA:
+                state = next_state
+
+            if next_state == Token.types.NUMBER and state == Token.types.IDENTIFIER:
                 next_state = state
 
-            if state == Token.types.LAMBDA:
-                if next_state is not None:
-                    if next_state != Token.types.SPACE:
-                        state = next_state
-                    else:
-                        continue
-                else:
-                    raise ValueError(f"Invalid token {next} at {self.position}-{index}!")
-            if state == next_state:
-                stack.append(next)
-
-                if state not in Token.CHAINING_TOKENS:
-                    index += 1
+            if state in Token.CHAINING_TOKENS:
+                if state != next_state:
+                    break
             else:
-                break
+                if len(stack) > 0:
+                    break
+
+            stack.append(next)
 
         self.position = index
         self.next = Token(state, "".join(stack))
