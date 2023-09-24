@@ -163,5 +163,4 @@ class Parser:
         return self.tokenizer.next.check(type_)
     
     def _consume_token(self):
-        print("CONSUME", self.tokenizer.next.type.name)
         return self.tokenizer.select_next()
