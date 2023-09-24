@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class SymbolTable:
-    table : T.Dict[str, int | T.Callable] = field(default_factory=dict)
+    table : T.Dict[str, T.Any] = field(default_factory=dict)
 
     RESERVED = {
         "Println": print
