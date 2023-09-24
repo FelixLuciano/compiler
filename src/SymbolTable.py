@@ -11,7 +11,10 @@ class SymbolTable:
     }
 
     def set(self, identifier: str, value: int) -> None:
-        self.table[identifier] = value
+        if identifier not in self.RESERVED:
+            self.table[identifier] = value
+        else:
+            raise KeyError(f"{identifier} couldn't be assigned because it is a reserved keyword!")
     
     def get(self, identifier: str) -> T.Union[int, T.Callable]:
         if identifier in self.RESERVED:
