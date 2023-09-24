@@ -31,9 +31,10 @@ class Tokenizer:
 
             if next_state is None:
                 raise ValueError(f"Invalid token {next} at {self.position}!")
-            elif next_state == Token.types.SPACE:
-                continue
-            elif state == Token.types.LAMBDA:
+            elif state == Token.types.LAMBDA:    
+                if next_state == Token.types.SPACE:
+                    continue
+
                 state = next_state
 
             if next_state == Token.types.NUMBER and state == Token.types.IDENTIFIER:
