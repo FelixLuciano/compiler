@@ -7,7 +7,7 @@ class SymbolTable:
     table : T.Dict[str, int | T.Callable] = field(default_factory=dict)
 
     RESERVED = {
-        "print": print
+        "Println": print
     }
 
     def set(self, identifier: str, value: int) -> None:
