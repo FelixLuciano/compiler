@@ -146,14 +146,14 @@ class Parser:
 
             expression = self.parse_expression()
 
-            if self._check_next_for(Token.types.CLOSE_PARENTHESIS):
-                self._consume_token()
-
-                return expression
-            else:
+            if not self._check_next_for(Token.types.CLOSE_PARENTHESIS):
                 raise ValueError(
                     f"Expected ) after expression at {self.tokenizer.position}!"
                 )
+
+            self._consume_token()
+
+            return expression
     
     def _check_next_for(self, type_: Token.types):
         return self.tokenizer.next.check(type_)
