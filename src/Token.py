@@ -37,7 +37,7 @@ class Token:
                 return cls.SPACE
             if value in string.digits:
                 return cls.NUMBER
-            if value in string.ascii_letters:
+            if value in string.ascii_letters + "_":
                 return cls.IDENTIFIER
             if value == "=":
                 return cls.ASSIGNMENT
