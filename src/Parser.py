@@ -19,15 +19,15 @@ class Parser:
     tokenizer: Tokenizer = field()
 
     @staticmethod
-    def run(code: str) -> Abstract_node: 
+    def run(code: str) -> Abstract_node:
         tokenizer = Tokenizer(Pre_processing.filter(code))
 
         tokenizer.select_next()
-    
+
         parser = Parser(tokenizer)
         answer = parser.parse_block()
 
-        if tokenizer.next.type != Token.types.END_OF_FILE:
+        if not tokenizer.next.check(Token.types.END_OF_FILE):
             raise ValueError(f'Invalid expression "{code}"')
 
         return answer
@@ -35,7 +35,7 @@ class Parser:
     def parse_block(self) -> Block_node:
         statements = []
 
-        while not self._check_next_for(Token.types.END_OF_FILE):
+        while not self.check(Token.types.END_OF_FILE):
             statement = self.parse_statement()
 
             statements.append(statement)
@@ -43,124 +43,120 @@ class Parser:
         return Block_node(None, statements)
 
     def parse_statement(self):
-        statement = No_operation_node
+        statement = No_operation_node()
 
-        if self._check_next_for(Token.types.IDENTIFIER):
-            identifier = self.tokenizer.next
+        if self.check(Token.types.IDENTIFIER):
+            identifier = self.get_then_consume()
 
-            self._consume_token()
-
-            if self._check_next_for(Token.types.ASSIGNMENT):
-                self._consume_token()
-
-                statement = Identifier_assignment_node(identifier.value, [self.parse_expression()])
-            elif self._check_next_for(Token.types.OPEN_PARENTHESIS):
-                self._consume_token()
-
+            if self.check_then_consume(Token.types.ASSIGNMENT):
+                statement = Identifier_assignment_node(
+                    value=identifier.value,
+                    children=[
+                        self.parse_expression(),
+                    ],
+                )
+            elif self.check_then_consume(Token.types.OPEN_PARENTHESIS):
                 arguments = []
 
-                while not self._check_next_for(Token.types.CLOSE_PARENTHESIS):
-                    expression = self.parse_expression()
+                while not self.check_then_consume(Token.types.CLOSE_PARENTHESIS):
+                    arguments.append(self.parse_expression())
 
-                    if self._check_next_for(Token.types.SEPARATOR):
-                        self._consume_token()
-                    elif self._check_next_for(Token.types.END_OF_LINE):
+                    if self.check_then_consume(Token.types.SEPARATOR):
+                        continue
+                    elif self.check(Token.types.END_OF_LINE):
                         raise ValueError(
                             f"Expected , or ) after expression at {self.tokenizer.position}!"
                         )
 
-                    arguments.append(expression)
+                statement = Identifier_call_node(
+                    value=identifier.value,
+                    children=arguments,
+                )
 
-                self._consume_token()
-        
-                statement = Identifier_call_node(identifier.value, arguments)
-
-        if not self._check_next_for(Token.types.END_OF_LINE):
-            raise ValueError(
-                f"Expected new line after statement at {self.tokenizer.position}!"
-            )
-        
-        self._consume_token()
+        self.expect_then_consume(Token.types.END_OF_LINE)
 
         return statement
 
     def parse_expression(self) -> Abstract_node:
         root = self.parse_term()
 
-        while True:
-            if self._check_next_for(Token.types.OP_PLUS):
-                operator = Token.types.OP_PLUS
-            elif self._check_next_for(Token.types.OP_MINUS):
-                operator = Token.types.OP_MINUS
-            else:
-                break
-
-            self._consume_token()
-
-            next = self.parse_term()
-
-            if operator == Token.types.OP_PLUS:
-                root = Binary_operation_node(Token.types.OP_PLUS, [root, next])
-            elif operator == Token.types.OP_MINUS:
-                root = Binary_operation_node(Token.types.OP_MINUS, [root, next])
+        while self.check_any(Token.types.OP_PLUS, Token.types.OP_MINUS):
+            root = Binary_operation_node(
+                value=self.get_then_consume().type,
+                children=[
+                    root,
+                    self.parse_term(),
+                ],
+            )
 
         return root
 
     def parse_term(self) -> Abstract_node:
         root = self.parse_factor()
 
-        while True:
-            if self._check_next_for(Token.types.OP_MULT):
-                operator = Token.types.OP_MULT
-            elif self._check_next_for(Token.types.OP_DIV):
-                operator = Token.types.OP_DIV
-            else:
-                break
-
-            self._consume_token()
-
-            if operator == Token.types.OP_MULT:
-                root = Binary_operation_node(Token.types.OP_MULT, [root, self.parse_factor()])
-            elif operator == Token.types.OP_DIV:
-                root = Binary_operation_node(Token.types.OP_DIV, [root, self.parse_factor()])
+        while self.check_any(Token.types.OP_MULT, Token.types.OP_DIV):
+            root = Binary_operation_node(
+                value=self.get_then_consume().type,
+                children=[
+                    root,
+                    self.parse_factor(),
+                ],
+            )
 
         return root
-    
-    def parse_factor(self):
-        if self._check_next_for(Token.types.NUMBER):
-            value = self.tokenizer.next.value
-            
-            self._consume_token()
 
-            return Integer_value_node(value)
-        if self._check_next_for(Token.types.IDENTIFIER):
-            value = self.tokenizer.next.value
-            
-            self._consume_token()
-
-            return Identifier_reference_node(value)
-        elif self._check_next_for(Token.types.OP_PLUS):
-            self._consume_token()
-            return Unary_operation_node(Token.types.OP_PLUS, [self.parse_factor()])
-        elif self._check_next_for(Token.types.OP_MINUS):
-            self._consume_token()
-            return Unary_operation_node(Token.types.OP_MINUS, [self.parse_factor()])
-        elif self._check_next_for(Token.types.OPEN_PARENTHESIS):
-            self._consume_token()
-
+    def parse_factor(self) -> Abstract_node:
+        if self.check(Token.types.NUMBER):
+            return Integer_value_node(value=self.get_then_consume().value)
+        if self.check(Token.types.IDENTIFIER):
+            return Identifier_reference_node(value=self.get_then_consume().value)
+        elif self.check_then_consume(Token.types.OP_PLUS):
+            return Unary_operation_node(
+                value=Token.types.OP_PLUS, children=[self.parse_factor()]
+            )
+        elif self.check_then_consume(Token.types.OP_MINUS):
+            return Unary_operation_node(
+                value=Token.types.OP_MINUS, children=[self.parse_factor()]
+            )
+        elif self.check_then_consume(Token.types.OPEN_PARENTHESIS):
             expression = self.parse_expression()
 
-            if not self._check_next_for(Token.types.CLOSE_PARENTHESIS):
-                raise ValueError(
-                    f"Expected ) after expression at {self.tokenizer.position}!"
-                )
-
-            self._consume_token()
+            self.expect_then_consume(Token.types.CLOSE_PARENTHESIS)
 
             return expression
-    
-    def _check_next_for(self, type_: Token.types):
+
+        raise ValueError(
+            f"Unexpected token {self.tokenizer.next.type.name} at {self.tokenizer.position}!"
+        )
+
+    def consume(self):
+        self.tokenizer.select_next()
+
+    def get_then_consume(self):
+        next = self.tokenizer.next
+
+        self.consume()
+
+        return next
+
+    def check(self, type_: Token.types):
         return self.tokenizer.next.check(type_)
-    
-    def _consume_token(self):
-        return self.tokenizer.select_next()
+
+    def check_any(self, *types: Token.types):
+        return any(self.check(type_) for type_ in types)
+
+    def check_then_consume(self, type_: Token.types):
+        if self.check(type_):
+            self.consume()
+
+            return True
+
+        return False
+
+    def expect_then_consume(self, type_: Token.types):
+        if self.check_then_consume(type_):
+            return
+
+        raise ValueError(
+            f"Expected {type_.name} at {self.tokenizer.position}, instead got {self.tokenizer.next.type.name}!"
+        )
