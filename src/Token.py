@@ -64,4 +64,6 @@ class Token:
 
 LAMBDA = Token(Token.types.LAMBDA, "")
 END_OF_FILE = Token(Token.types.END_OF_FILE, "")
-Token.CHAINING_TOKENS = set((Token.types.SPACE, Token.types.NUMBER, Token.types.IDENTIFIER))
+Token.CHAINING_TOKENS = set(
+    (Token.types.SPACE, Token.types.NUMBER, Token.types.IDENTIFIER)
+)

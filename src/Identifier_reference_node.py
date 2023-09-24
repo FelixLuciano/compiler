@@ -9,5 +9,5 @@ class Identifier_reference_node(Abstract_node):
 
         if isinstance(value, int):
             return value
-        
+
         raise ValueError(f"{self.value} is not an valid reference!")
