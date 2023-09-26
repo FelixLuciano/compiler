@@ -5,6 +5,11 @@
 ![git status](http://3.129.230.99/svg/FelixLuciano/compiler/)
 
 ## Diagrama Sintático
+<details>
+<summary>
+  Click to reveal
+</summary>
+
 ```txt
 STATEMENT
                                                                        ╭────╮    
@@ -58,8 +63,14 @@ FACTOR
     ┼─ ->│ ( ├─ ->│ EXPRESSION ├─ ->│ ) ├─┼
          ╰───╯    └────────────┘    ╰───╯
 ```
+</details>
 
 ## EBMF
+<details>
+<summary>
+  Click to reveal
+</summary>
+
 ```txt
 BLOCK = { STATEMENT };
 STATEMENT = ( λ | ASSIGNMENT | CALL), "\n" ;
@@ -73,3 +84,4 @@ IDENTIFIER = LETTER, { LETTER | DIGIT | "_" } ;
 DIGIT      = ( 0-9 ) ;
 LETTER     = ( a-z | A-Z ) ;
 ```
+</details>
