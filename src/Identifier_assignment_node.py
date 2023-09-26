@@ -6,5 +6,9 @@ from src.SymbolTable import SymbolTable
 class Identifier_assignment_node(Abstract_node):
     value: str
 
-    def evaluate(self, context: SymbolTable) -> None:
-        context.set(self.value, self.children[0].evaluate(context))
+    def evaluate(self, context: SymbolTable) -> int:
+        value = self.children[0].evaluate(context)
+
+        context.set(self.value, value)
+
+        return value

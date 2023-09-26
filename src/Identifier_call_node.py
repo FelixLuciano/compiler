@@ -9,6 +9,6 @@ class Identifier_call_node(Abstract_node):
         args = (child.evaluate(context) for child in self.children)
 
         if callable(func):
-            func(*args)
+            return func(*args)
         else:
             raise ValueError(f"{self.value} is not callable!")

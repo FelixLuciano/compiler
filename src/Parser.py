@@ -42,7 +42,7 @@ class Parser:
 
         return Block_node(None, statements)
 
-    def parse_statement(self):
+    def parse_statement(self, endl=True):
         statement = No_operation_node()
 
         if self.check(Token.types.IDENTIFIER):
@@ -52,7 +52,7 @@ class Parser:
                 statement = Identifier_assignment_node(
                     value=identifier.value,
                     children=[
-                        self.parse_expression(),
+                        self.parse_statement(False),
                     ],
                 )
             elif self.check_then_consume(Token.types.OPEN_PARENTHESIS):
@@ -72,8 +72,12 @@ class Parser:
                     value=identifier.value,
                     children=arguments,
                 )
+        elif not self.check(Token.types.END_OF_LINE):
+            return self.parse_expression()
 
-        self.expect_then_consume(Token.types.END_OF_LINE)
+        if endl:
+            if not self.check(Token.types.END_OF_FILE):
+                self.expect_then_consume(Token.types.END_OF_LINE)
 
         return statement
 
