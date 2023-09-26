@@ -6,7 +6,10 @@ from dataclasses import dataclass, field
 class SymbolTable:
     table: T.Dict[str, T.Any] = field(default_factory=dict)
 
-    RESERVED = {"Println": print}
+    RESERVED = {
+        "Println": print,
+        "Scan": lambda: int(input("Scan: ")),
+    }
 
     def set(self, identifier: str, value: int) -> None:
         if identifier not in self.RESERVED:
