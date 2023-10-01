@@ -50,7 +50,12 @@ class Tokenizer:
             stack.append(next)
 
         self.position = index
-        self.next = Token(state, "".join(stack))
+        value = "".join(stack)
+
+        if state in Token.CHAINING_TOKENS:
+            state = Token.types.get(value.lower(), True) or state
+
+        self.next = Token(state, value)
 
     def assert_type(self, type: Token.types):
         if not self.next.check(type):
