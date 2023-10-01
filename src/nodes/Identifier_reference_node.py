@@ -1,9 +1,8 @@
-from src.Abstract_node import Abstract_node
-
+import src.nodes as nodes
 from src.SymbolTable import SymbolTable
 
 
-class Identifier_reference_node(Abstract_node):
+class Identifier_reference_node(nodes.Node):
     def evaluate(self, context: SymbolTable) -> int:
         value = context.get(self.value)
 

@@ -1,9 +1,8 @@
-from src.Abstract_node import Abstract_node
-
+import src.nodes as nodes
 from src.SymbolTable import SymbolTable
 
 
-class Integer_value_node(Abstract_node):
+class Integer_value_node(nodes.Node):
     value: int
 
     def evaluate(self, context: SymbolTable) -> int:

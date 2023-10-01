@@ -1,10 +1,9 @@
-from src.Abstract_node import Abstract_node
+import src.nodes as nodes
+from src.SymbolTable import SymbolTable
 from src.Token import Token
 
-from src.SymbolTable import SymbolTable
 
-
-class Unary_operation_node(Abstract_node):
+class Unary_operation_node(nodes.Node):
     value: Token.types
 
     def evaluate(self, context: SymbolTable) -> int:
