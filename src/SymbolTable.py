@@ -8,7 +8,7 @@ class SymbolTable:
 
     RESERVED = {
         "Println": print,
-        "Scan": lambda: int(input("Scan: ")),
+        "Scanln": lambda: int(input("")),
     }
 
     def set(self, identifier: str, value: int) -> None:
