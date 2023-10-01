@@ -95,31 +95,30 @@ class Parser:
             expression = self.parse_boolean_expression()
 
             if isinstance(expression, nodes.Identifier_reference):
-                if root:
-                    operation = None
+                operation = None
 
-                    if self.check_then_consume(Token.types.ASSIGNMENT_PLUS):
-                        operation = Token.types.OP_PLUS
-                    elif self.check_then_consume(Token.types.ASSIGNMENT_MINUS):
-                        operation = Token.types.OP_MINUS
-                    elif self.check_then_consume(Token.types.ASSIGNMENT_MULT):
-                        operation = Token.types.OP_MULT
-                    elif self.check_then_consume(Token.types.ASSIGNMENT_DIV):
-                        operation = Token.types.OP_DIV
+                if self.check_then_consume(Token.types.ASSIGNMENT_PLUS):
+                    operation = Token.types.OP_PLUS
+                elif self.check_then_consume(Token.types.ASSIGNMENT_MINUS):
+                    operation = Token.types.OP_MINUS
+                elif self.check_then_consume(Token.types.ASSIGNMENT_MULT):
+                    operation = Token.types.OP_MULT
+                elif self.check_then_consume(Token.types.ASSIGNMENT_DIV):
+                    operation = Token.types.OP_DIV
 
-                    if operation is not None:
-                        return nodes.Identifier_assignment(
-                            value=expression.value,
-                            children=[
-                                nodes.Binary_operation(
-                                    value=operation,
-                                    children=[
-                                        expression,
-                                        self.parse_assignment(False),
-                                    ]
-                                ),
-                            ],
-                        )
+                if operation is not None:
+                    return nodes.Identifier_assignment(
+                        value=expression.value,
+                        children=[
+                            nodes.Binary_operation(
+                                value=operation,
+                                children=[
+                                    expression,
+                                    self.parse_assignment(False),
+                                ]
+                            ),
+                        ],
+                    )
 
                 if self.check_then_consume(Token.types.ASSIGNMENT):
                     return nodes.Identifier_assignment(
