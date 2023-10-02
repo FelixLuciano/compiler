@@ -6,10 +6,18 @@ from src.Token import Token
 class Unary_operation_node(nodes.Node):
     value: Token.types
 
-    def evaluate(self, context: SymbolTable) -> int:
-        if self.value == Token.types.OP_PLUS:
-            return self.children[0].evaluate(context)
-        elif self.value == Token.types.OP_MINUS:
-            return self.children[0].evaluate(context) * -1
+    OPERATIONS = {
+        Token.types.OP_PLUS: lambda x: x,
+        Token.types.OP_MINUS: lambda x: -x,
+        Token.types.OP_NOT: lambda x: 0 if x == 1 else 1,
+    }
 
-        raise ValueError(f"{self.value} is not an Valid operation!")
+    def evaluate(self, context: SymbolTable) -> int:
+        x = self.children[0].evaluate(context)
+
+        try:
+            method = Unary_operation_node.OPERATIONS[self.value]
+            
+            return method(x)
+        except KeyError:
+            raise ValueError(f"{self.value} is not an Valid operation!")
