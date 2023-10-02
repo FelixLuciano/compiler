@@ -117,13 +117,13 @@ class Parser:
         return expression
     
     def parse_boolean_expression(self) -> nodes.Node:
-        return self.parse_binary_operation(self.parse_boolean_term, Token.types.OP_EQUAL, Token.types.OP_NOT_EQUAL, Token.types.OP_GREATER, Token.types.OP_LOWER, Token.types.OP_GREATER_EQUAL, Token.types.OP_LOWER_EQUAL)
+        return self.parse_binary_operation(self.parse_boolean_term, Token.types.OP_OR)
 
     def parse_boolean_term(self) -> nodes.Node:
-        return self.parse_binary_operation(self.parse_boolean_factor, Token.types.OP_OR)
+        return self.parse_binary_operation(self.parse_boolean_factor, Token.types.OP_AND)
     
     def parse_boolean_factor(self) -> nodes.Node:
-        return self.parse_binary_operation(self.parse_arithmetic_expression, Token.types.OP_AND)
+        return self.parse_binary_operation(self.parse_arithmetic_expression, Token.types.OP_EQUAL, Token.types.OP_NOT_EQUAL, Token.types.OP_GREATER, Token.types.OP_LOWER, Token.types.OP_GREATER_EQUAL, Token.types.OP_LOWER_EQUAL)
 
     def parse_arithmetic_expression(self) -> nodes.Node:
         return self.parse_binary_operation(self.parse_arithmetic_term, Token.types.OP_PLUS, Token.types.OP_MINUS)
