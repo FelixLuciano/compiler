@@ -11,7 +11,7 @@ class Binary_operation_node(nodes.Node):
         Token.types.OP_MINUS: lambda x, y: x - y,
         Token.types.OP_MULT: lambda x, y: x * y,
         Token.types.OP_DIV: lambda x, y: x // y,
-        Token.types.OP_POWER: lambda x, y: x ** y,
+        # Token.types.OP_POWER: lambda x, y: x ** y,
         Token.types.OP_AND: lambda x, y: 1 if x and y else 0,
         Token.types.OP_OR: lambda x, y: 1 if x or y else 0,
         Token.types.OP_EQUAL: lambda x, y: 1 if x == y else 0,
