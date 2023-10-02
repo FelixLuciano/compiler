@@ -41,6 +41,8 @@ class Tokenizer:
                 next_state = state
 
             if state in Token.CHAINING_TOKENS:
+                if len(stack) > 0 and stack[0] in "!-+/" and next in "!-+/":
+                    break
                 if state != next_state:
                     break
             else:
