@@ -28,6 +28,7 @@ class Token:
         OP_MINUS = auto()
         OP_MULT = auto()
         OP_DIV = auto()
+        OP_POWER = auto()
         OP_AND = auto()
         OP_OR = auto()
         OP_NOT = auto()
@@ -61,7 +62,7 @@ class Token:
                         return cls.NUMBER
                     elif value in string.ascii_letters + "_":
                         return cls.IDENTIFIER
-                    elif value in "!&-+=|<>" and not is_eval:
+                    elif value in "!&*-+=|<>" and not is_eval:
                         return cls.CHAINED_SYMBOL
 
                 return {
@@ -73,6 +74,7 @@ class Token:
                     "+": cls.OP_PLUS,
                     "-": cls.OP_MINUS,
                     "*": cls.OP_MULT,
+                    "**": cls.OP_POWER,
                     "/": cls.OP_DIV,
                     "(": cls.OPEN_PARENTHESIS,
                     ")": cls.CLOSE_PARENTHESIS,
