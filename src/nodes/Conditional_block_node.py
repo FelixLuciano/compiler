@@ -8,7 +8,7 @@ class Conditional_block_node(nodes.Node):
     def evaluate(self, context: SymbolTable) -> None:
         value = self.children[0].evaluate(context)
 
-        if (value == True):
+        if (value == 1):
             self.children[1].evaluate(context)
         elif (len(self.children) > 2):
             self.children[2].evaluate(context)
