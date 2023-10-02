@@ -34,45 +34,28 @@ class Parser:
 
         return nodes.Block(None, statements)
 
-    def parse_block(self) -> nodes.Block:
-        statements = []
-
-        self.expect_then_consume(Token.types.OPEN_BRACES)
-
-        while not self.check_then_consume(Token.types.CLOSE_BRACES):
-            statement = self.parse_statement()
-
-            statements.append(statement)
-
-        return nodes.Block(None, statements)
-
     def parse_statement(self, endl=True):
         statement = nodes.No_operation()
 
-        if self.check(Token.types.IDENTIFIER):
-            statement = self.parse_assignment()
-        elif self.check_then_consume(Token.types.IF_STATEMENT):
-            children = [self.parse_boolean_expression(), self.parse_block()]
-
-            while self.check_then_consume(Token.types.END_OF_LINE):
-                continue
+        if self.check_then_consume(Token.types.IF_STATEMENT):
+            children = [self.parse_expression(), self.parse_block()]
 
             if self.check_then_consume(Token.types.ELSE_STATEMENT):
                 children.append(self.parse_block())
 
-            return nodes.Conditional_block(
+            statement =  nodes.Conditional_block(
                 value=None,
                 children=children,
             )
         elif self.check_then_consume(Token.types.FOR_STATEMENT):
-            assignment = self.parse_assignment()
+            assignment = self.parse_expression()
             self.expect_then_consume(Token.types.HARD_SEPARATOR)
-            condition = self.parse_boolean_expression()
+            condition = self.parse_expression()
             self.expect_then_consume(Token.types.HARD_SEPARATOR)
-            step = self.parse_assignment()
+            step = self.parse_expression()
             block = self.parse_block()
 
-            return nodes.Iterator_block(
+            statement =  nodes.Iterator_block(
                 value=None,
                 children=[
                     assignment,
@@ -82,74 +65,56 @@ class Parser:
                 ],
             )
         elif not self.check(Token.types.END_OF_LINE):
-            return self.parse_boolean_expression()
+            statement =  self.parse_expression()
 
-        if endl:
-            if not self.check(Token.types.END_OF_FILE):
-                self.expect_then_consume(Token.types.END_OF_LINE)
+        self.expect_then_consume(Token.types.END_OF_LINE)
 
         return statement
     
-    def parse_assignment(self, root=True):
-        if self.check(Token.types.IDENTIFIER):
-            expression = self.parse_boolean_expression()
+    def parse_expression(self):
+        expression = self.parse_boolean_expression()
 
-            if isinstance(expression, nodes.Identifier_reference):
+        if isinstance(expression, nodes.Identifier_reference):
+            assign = False
+            operation = None
+
+            if self.check_any(Token.types.ASSIGNMENT, Token.types.ASSIGNMENT_PLUS, Token.types.ASSIGNMENT_MINUS, Token.types.ASSIGNMENT_MULT, Token.types.ASSIGNMENT_DIV):
                 operation = None
+                if not self.check(Token.types.ASSIGNMENT):
+                    operation = self.get_then_consume().type
+                else:
+                    self.consume()
+                assign = True
 
-                if self.check_then_consume(Token.types.ASSIGNMENT_PLUS):
+                if operation == Token.types.ASSIGNMENT_PLUS:
                     operation = Token.types.OP_PLUS
-                elif self.check_then_consume(Token.types.ASSIGNMENT_MINUS):
+                elif operation == Token.types.ASSIGNMENT_MINUS:
                     operation = Token.types.OP_MINUS
-                elif self.check_then_consume(Token.types.ASSIGNMENT_MULT):
+                elif operation == Token.types.ASSIGNMENT_MULT:
                     operation = Token.types.OP_MULT
-                elif self.check_then_consume(Token.types.ASSIGNMENT_DIV):
+                elif operation == Token.types.ASSIGNMENT_DIV:
                     operation = Token.types.OP_DIV
 
+            if assign:
+                value = self.parse_expression()
+
                 if operation is not None:
-                    return nodes.Identifier_assignment(
-                        value=expression.value,
+                    value = nodes.Binary_operation(
+                        value=operation,
                         children=[
-                            nodes.Binary_operation(
-                                value=operation,
-                                children=[
-                                    expression,
-                                    self.parse_assignment(False),
-                                ]
-                            ),
-                        ],
+                            expression,
+                            value,
+                        ]
                     )
 
-                if self.check_then_consume(Token.types.ASSIGNMENT):
-                    return nodes.Identifier_assignment(
-                        value=expression.value,
-                        children=[
-                            self.parse_assignment(False),
-                        ],
-                    )
+                return nodes.Identifier_assignment(
+                    value=expression.value,
+                    children=[
+                        value,
+                    ],
+                )
 
-            return expression
-        elif not root:
-            return self.parse_boolean_expression()
-
-        self.raise_unexpected_token()
-
-    def parse_call(self, reference: nodes.Identifier_reference) -> nodes.Identifier_call:
-        self.expect_then_consume(Token.types.OPEN_PARENTHESIS)
-
-        arguments = []
-        while not self.check_then_consume(Token.types.CLOSE_PARENTHESIS):
-            arguments.append(self.parse_boolean_expression())
-
-            if self.check_then_consume(Token.types.SEPARATOR):
-                continue
-            elif self.check(Token.types.END_OF_LINE):
-                self.raise_unexpected_token()
-
-        return nodes.Identifier_call(
-            value=reference.value,
-            children=arguments,
-        )
+        return expression
     
     def parse_boolean_expression(self) -> nodes.Node:
         return self.parse_binary_operation(self.parse_boolean_term, Token.types.OP_EQUAL, Token.types.OP_NOT_EQUAL, Token.types.OP_GREATER, Token.types.OP_LOWER, Token.types.OP_GREATER_EQUAL, Token.types.OP_LOWER_EQUAL)
@@ -158,13 +123,13 @@ class Parser:
         return self.parse_binary_operation(self.parse_boolean_factor, Token.types.OP_OR)
     
     def parse_boolean_factor(self) -> nodes.Node:
-        return self.parse_binary_operation(self.parse_expression, Token.types.OP_AND)
+        return self.parse_binary_operation(self.parse_arithmetic_expression, Token.types.OP_AND)
 
-    def parse_expression(self) -> nodes.Node:
-        return self.parse_binary_operation(self.parse_term, Token.types.OP_PLUS, Token.types.OP_MINUS)
+    def parse_arithmetic_expression(self) -> nodes.Node:
+        return self.parse_binary_operation(self.parse_arithmetic_term, Token.types.OP_PLUS, Token.types.OP_MINUS)
 
-    def parse_term(self) -> nodes.Node:
-        return self.parse_binary_operation(self.parse_factor, Token.types.OP_MULT, Token.types.OP_DIV)
+    def parse_arithmetic_term(self) -> nodes.Node:
+        return self.parse_binary_operation(self.parse_arithmetic_factor, Token.types.OP_MULT, Token.types.OP_DIV)
 
     def parse_binary_operation(self, get_factor, *operators):
         root = get_factor()
@@ -180,29 +145,65 @@ class Parser:
 
         return root
 
-    def parse_factor(self) -> nodes.Node:
-        if self.check(Token.types.NUMBER):
-            return nodes.Integer_value(value=self.get_then_consume().value)
-        elif self.check_any(Token.types.OP_PLUS, Token.types.OP_MINUS, Token.types.OP_NOT):
-            return nodes.Unary_operation(
-                value=self.get_then_consume().type,
-                children=[self.parse_factor()]
-            )
-        elif self.check_then_consume(Token.types.OPEN_PARENTHESIS):
-            expression = self.parse_boolean_expression()
+    def parse_arithmetic_factor(self) -> nodes.Node:
+        factor = None
+
+        if self.check_then_consume(Token.types.OPEN_PARENTHESIS):
+            factor = self.parse_boolean_expression()
 
             self.expect_then_consume(Token.types.CLOSE_PARENTHESIS)
-
-            return expression
+        elif self.check(Token.types.NUMBER):
+            factor =  nodes.Integer_value(value=self.get_then_consume().value)
         elif self.check(Token.types.IDENTIFIER):
-            identifier = self.get_then_consume()
+            factor = nodes.Identifier_reference(value=self.get_then_consume().value)
 
             if self.check(Token.types.OPEN_PARENTHESIS):
-                return self.parse_call(nodes.Identifier_reference(identifier.value))
+                factor = self.parse_call(factor)
+        elif self.check_any(Token.types.OP_PLUS, Token.types.OP_MINUS, Token.types.OP_NOT):
+            factor = nodes.Unary_operation(
+                value=self.get_then_consume().type,
+                children=[self.parse_arithmetic_factor()]
+            )
 
-            return nodes.Identifier_reference(value=identifier.value)
+        if factor is not None:
+            if self.check(Token.types.OP_POWER):
+                factor = nodes.Binary_operation(
+                    value=self.get_then_consume().type,
+                    children=[factor, self.parse_arithmetic_factor()]
+                )
 
-        self.raise_unexpected_token()
+            return factor
+
+        return self.raise_unexpected_token()
+
+    def parse_call(self, reference: nodes.Identifier_reference) -> nodes.Identifier_call:
+        self.expect_then_consume(Token.types.OPEN_PARENTHESIS)
+
+        arguments = []
+
+        if not self.check(Token.types.CLOSE_PARENTHESIS):
+            arguments.append(self.parse_boolean_expression())
+
+        while self.check_then_consume(Token.types.SEPARATOR):
+            arguments.append(self.parse_boolean_expression())
+
+        self.expect_then_consume(Token.types.CLOSE_PARENTHESIS)
+
+        return nodes.Identifier_call(
+            value=reference.value,
+            children=arguments,
+        )
+
+    def parse_block(self) -> nodes.Block:
+        statements = []
+
+        self.expect_then_consume(Token.types.OPEN_BRACES)
+        self.expect_then_consume(Token.types.END_OF_LINE)
+
+        while not self.check_then_consume(Token.types.CLOSE_BRACES):
+            statements.append(self.parse_statement())
+
+        return nodes.Block(None, statements)
 
     def consume(self):
         self.tokenizer.select_next()
