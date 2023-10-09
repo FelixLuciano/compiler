@@ -78,7 +78,7 @@ class Parser:
             assign = False
             operation = None
 
-            if self.check_any(Token.types.ASSIGNMENT, Token.types.ASSIGNMENT_PLUS, Token.types.ASSIGNMENT_MINUS, Token.types.ASSIGNMENT_MULT, Token.types.ASSIGNMENT_DIV):
+            if self.check_any(Token.types.ASSIGNMENT, Token.types.ASSIGNMENT_PLUS, Token.types.ASSIGNMENT_MINUS, Token.types.ASSIGNMENT_MULT, Token.types.ASSIGNMENT_DIV, Token.types.ASSIGNMENT_MODULO):
                 operation = None
                 if not self.check(Token.types.ASSIGNMENT):
                     operation = self.get_then_consume().type
@@ -94,6 +94,8 @@ class Parser:
                     operation = Token.types.OP_MULT
                 elif operation == Token.types.ASSIGNMENT_DIV:
                     operation = Token.types.OP_DIV
+                elif operation == Token.types.ASSIGNMENT_MODULO:
+                    operation = Token.types.OP_MODULO
 
             if assign:
                 value = self.parse_expression()
@@ -167,11 +169,17 @@ class Parser:
 
         if factor is not None:
             if self.check_then_consume(Token.types.OP_NOT):
-                factor = nodes.Unary_operation(
-                    value=Token.types.OP_FATORIAL,
-                    children=[factor]
-                )
-            elif self.check(Token.types.OP_POWER):
+                if isinstance(factor, nodes.Binary_operation):
+                    factor.children[1] = nodes.Unary_operation(
+                        value=Token.types.OP_FATORIAL,
+                        children=[factor.children[1]]
+                    )
+                else:
+                    factor = nodes.Unary_operation(
+                        value=Token.types.OP_FATORIAL,
+                        children=[factor]
+                    )
+            elif self.check_any(Token.types.OP_POWER, Token.types.OP_MODULO):
                 factor = nodes.Binary_operation(
                     value=self.get_then_consume().type,
                     children=[factor, self.parse_arithmetic_factor()]

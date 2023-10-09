@@ -24,10 +24,12 @@ class Token:
         ASSIGNMENT_MINUS = auto()
         ASSIGNMENT_MULT = auto()
         ASSIGNMENT_DIV = auto()
+        ASSIGNMENT_MODULO = auto()
         OP_PLUS = auto()
         OP_MINUS = auto()
         OP_MULT = auto()
         OP_DIV = auto()
+        OP_MODULO = auto()
         OP_POWER = auto()
         OP_FATORIAL = auto()
         OP_AND = auto()
@@ -63,7 +65,7 @@ class Token:
                         return cls.NUMBER
                     elif value in string.ascii_letters + "_":
                         return cls.IDENTIFIER
-                    elif value in "!&*-+=|<>" and not is_eval:
+                    elif value in "!%&*-+=|<>" and not is_eval:
                         return cls.CHAINED_SYMBOL
 
                 return {
@@ -72,11 +74,13 @@ class Token:
                     "-=": cls.ASSIGNMENT_MINUS,
                     "*=": cls.ASSIGNMENT_MULT,
                     "/=": cls.ASSIGNMENT_DIV,
+                    "%=": cls.ASSIGNMENT_MODULO,
                     "+": cls.OP_PLUS,
                     "-": cls.OP_MINUS,
                     "*": cls.OP_MULT,
                     "**": cls.OP_POWER,
                     "/": cls.OP_DIV,
+                    "%": cls.OP_MODULO,
                     "(": cls.OPEN_PARENTHESIS,
                     ")": cls.CLOSE_PARENTHESIS,
                     "{": cls.OPEN_BRACES,
