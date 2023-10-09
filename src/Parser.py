@@ -166,7 +166,12 @@ class Parser:
             )
 
         if factor is not None:
-            if self.check(Token.types.OP_POWER):
+            if self.check_then_consume(Token.types.OP_NOT):
+                factor = nodes.Unary_operation(
+                    value=Token.types.OP_FATORIAL,
+                    children=[factor]
+                )
+            elif self.check(Token.types.OP_POWER):
                 factor = nodes.Binary_operation(
                     value=self.get_then_consume().type,
                     children=[factor, self.parse_arithmetic_factor()]

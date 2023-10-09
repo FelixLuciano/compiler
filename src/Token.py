@@ -29,6 +29,7 @@ class Token:
         OP_MULT = auto()
         OP_DIV = auto()
         OP_POWER = auto()
+        OP_FATORIAL = auto()
         OP_AND = auto()
         OP_OR = auto()
         OP_NOT = auto()

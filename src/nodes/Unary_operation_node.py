@@ -1,3 +1,5 @@
+import math
+
 import src.nodes as nodes
 from src.SymbolTable import SymbolTable
 from src.Token import Token
@@ -10,6 +12,7 @@ class Unary_operation_node(nodes.Node):
         Token.types.OP_PLUS: lambda x: x,
         Token.types.OP_MINUS: lambda x: -x,
         Token.types.OP_NOT: lambda x: 0 if x == 1 else 1,
+        Token.types.OP_FATORIAL: lambda x: math.factorial(x),
     }
 
     def evaluate(self, context: SymbolTable) -> int:
