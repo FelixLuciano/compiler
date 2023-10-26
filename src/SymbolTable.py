@@ -1,25 +1,44 @@
 import typing as T
 from dataclasses import dataclass, field
 
+from src.Typed_value import Typed_value
+
 
 @dataclass
 class SymbolTable:
-    table: T.Dict[str, T.Any] = field(default_factory=dict)
+    table: T.Dict[str, Typed_value] = field(default_factory=dict)
 
-    RESERVED = {
-        "Println": print,
-        "Scanln": lambda: int(input("")),
-    }
+    RESERVED: T.Dict[str, Typed_value] = field(
+        init=False,
+        repr=False,
+        default_factory=lambda: {
+            "false": Typed_value(Typed_value.types.INT, 0),
+            "true": Typed_value(Typed_value.types.INT, 1),
+            "Println": Typed_value(Typed_value.types.FUNCTION, lambda *args: print(*(arg.value for arg in args))),
+            "Scanln": Typed_value(Typed_value.types.FUNCTION, lambda: Typed_value(Typed_value.types.INT, int(input("")))),
+        }
+    )
 
-    def set(self, identifier: str, value: int) -> None:
+    def declare(self, identifier: str, type_: Typed_value.types) -> None:
         if identifier not in self.RESERVED:
-            self.table[identifier] = value
+            self.table[identifier] = Typed_value(type_, None)
         else:
             raise KeyError(
-                f"{identifier} couldn't be assigned because it is a reserved keyword!"
+                f"{identifier} couldn't be declared because it is a reserved keyword!"
             )
 
-    def get(self, identifier: str) -> T.Union[int, T.Callable]:
+    def set(self, identifier: str, value: Typed_value) -> None:
+        if identifier not in self.table:
+            raise KeyError(f"{identifier} as not declared!")
+    
+        type_ = self.table[identifier].type
+        
+        if (value.type != type_):
+            raise KeyError(f"Couldn't assign {value.type.name} into an {type_.name} variable!")
+
+        self.table[identifier] = value
+
+    def get(self, identifier: str) -> Typed_value:
         if identifier in self.RESERVED:
             return self.RESERVED[identifier]
         elif identifier in self.table:
