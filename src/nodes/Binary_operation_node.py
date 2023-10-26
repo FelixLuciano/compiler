@@ -39,7 +39,7 @@ Binary_operation_node.OPERATIONS = {
     Token.types.OP_MULT: lambda x, y: x * y,
     Token.types.OP_DIV: lambda x, y: x // y,
     Token.types.OP_MODULO: lambda x, y: x % y,
-    Token.types.OP_POWER: lambda x, y: x ** y,
+    # Token.types.OP_POWER: lambda x, y: x ** y,
     Token.types.OP_CONCAT: lambda x, y: "".join(map(str, [x, y])),
     Token.types.OP_AND: lambda x, y: 1 if x and y else 0,
     Token.types.OP_OR: lambda x, y: 1 if x or y else 0,
