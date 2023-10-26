@@ -26,12 +26,15 @@ class Unary_operation_node(nodes.Node):
         x = self.children[0].evaluate(context)
 
         if x.type != Typed_value.types.INT:
-            raise Exception(f"Invalid unary operation into type {x.type.name}")
+            raise ValueError(f"Invalid unary operation {self.value.name} for type {x.type.name}")
 
         try:
             method = Unary_operation_node.OPERATIONS[self.value]
             
-            return method(x)
+            return Typed_value(
+                type=x.type,
+                value=method(x.value),
+            )
         except KeyError:
             raise ValueError(f"{self.value} is not an Valid operation!")
 
