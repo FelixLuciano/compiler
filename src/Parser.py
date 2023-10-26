@@ -85,10 +85,10 @@ class Parser:
                 ],
             )
         elif not self.check(Token.types.END_OF_LINE):
-            statement =  self.parse_expression()
+            statement = self.parse_expression()
 
-        if self.check_any(Token.types.END_OF_LINE, Token.types.END_OF_FILE):
-            self.check_then_consume(Token.types.END_OF_LINE)
+        if not self.check_then_consume(Token.types.END_OF_LINE):
+            self.expect(Token.types.END_OF_FILE)
 
         return statement
     
@@ -272,12 +272,15 @@ class Parser:
             return True
 
         return False
+    
+    def expect(self, type_: Token.types):
+        if not self.check(type_):
+            return self.raise_unexpected_token(type_)
 
     def expect_then_consume(self, type_: Token.types):
-        if self.check(type_):
-            return self.get_then_consume()
+        self.expect(type_)
 
-        return self.raise_unexpected_token(type_)
+        return self.get_then_consume()
 
     def raise_unexpected_token(self, expected: Token.types = None):
         if expected is not None:
