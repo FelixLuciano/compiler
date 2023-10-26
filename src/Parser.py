@@ -87,7 +87,8 @@ class Parser:
         elif not self.check(Token.types.END_OF_LINE):
             statement =  self.parse_expression()
 
-        self.expect_then_consume(Token.types.END_OF_LINE)
+        if self.check_any(Token.types.END_OF_LINE, Token.types.END_OF_FILE):
+            self.check_then_consume(Token.types.END_OF_LINE)
 
         return statement
     
@@ -174,6 +175,9 @@ class Parser:
             characters = []
 
             while not(self.check_then_consume(Token.types.QUOTATION)):
+                if self.check_any(Token.types.END_OF_LINE, Token.types.END_OF_FILE):
+                    self.raise_unexpected_token()
+
                 characters.append(self.get_then_consume().value)
 
             factor = nodes.String_value(value="".join(characters))
