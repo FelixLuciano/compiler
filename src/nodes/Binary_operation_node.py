@@ -20,10 +20,8 @@ class Binary_operation_node(nodes.Node):
             method = Binary_operation_node.OPERATIONS[self.value]
 
             if x.type != y.type:
-                try:
-                    y = y.transform(x.type)
-                except TypeError:
-                    x = x.transform(y.type)
+                if self.value != Token.types.OP_CONCAT:
+                    raise TypeError(f"Invalid operation {self.value.name} between {x.type.name} and {y.type.name}")
 
             return Typed_value(
                 type=x.type,
