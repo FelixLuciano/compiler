@@ -20,12 +20,16 @@ class SymbolTable:
     )
 
     def declare(self, identifier: str, type_: Typed_value.types) -> None:
-        if identifier not in self.RESERVED:
-            self.table[identifier] = Typed_value(type_, None)
-        else:
+        if identifier in self.RESERVED:
             raise KeyError(
                 f"{identifier} couldn't be declared because it is a reserved keyword!"
             )
+        elif identifier in self.table:
+            raise KeyError(
+                f"{identifier} couldn't be declared because it is was already declared!"
+            )
+
+        self.table[identifier] = Typed_value(type_, None)
 
     def set(self, identifier: str, value: Typed_value) -> None:
         if identifier not in self.table:
