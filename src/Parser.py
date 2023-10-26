@@ -4,6 +4,7 @@ import src.nodes as nodes
 from src.Pre_processing import Pre_processing
 from src.Token import Token
 from src.Tokenizer import Tokenizer
+from src.Typed_value import Typed_value
 
 
 @dataclass
@@ -37,13 +38,31 @@ class Parser:
     def parse_statement(self, endl=True):
         statement = nodes.No_operation()
 
+        if self.check(Token.types.TYPE):
+            type_ = self.get_then_consume().value
+            name = self.expect_then_consume(Token.types.IDENTIFIER).value
+
+            statement = nodes.Identifier_declaration(
+                value=name,
+                children=[
+                    nodes.String_value(type_)
+                ]
+            )
+
+            if self.check_then_consume(Token.types.ASSIGNMENT):
+                statement.children.append(nodes.Identifier_assignment(
+                    value=name,
+                    children=[
+                        self.parse_expression()
+                    ]
+                ))
         if self.check_then_consume(Token.types.IF_STATEMENT):
             children = [self.parse_expression(), self.parse_block()]
 
             if self.check_then_consume(Token.types.ELSE_STATEMENT):
                 children.append(self.parse_block())
 
-            statement =  nodes.Conditional_block(
+            statement = nodes.Conditional_block(
                 value=None,
                 children=children,
             )
@@ -128,7 +147,7 @@ class Parser:
         return self.parse_binary_operation(self.parse_arithmetic_expression, Token.types.OP_EQUAL, Token.types.OP_NOT_EQUAL, Token.types.OP_GREATER, Token.types.OP_LOWER, Token.types.OP_GREATER_EQUAL, Token.types.OP_LOWER_EQUAL)
 
     def parse_arithmetic_expression(self) -> nodes.Node:
-        return self.parse_binary_operation(self.parse_arithmetic_term, Token.types.OP_PLUS, Token.types.OP_MINUS)
+        return self.parse_binary_operation(self.parse_arithmetic_term, Token.types.OP_PLUS, Token.types.OP_MINUS, Token.types.OP_CONCAT)
 
     def parse_arithmetic_term(self) -> nodes.Node:
         return self.parse_binary_operation(self.parse_arithmetic_factor, Token.types.OP_MULT, Token.types.OP_DIV)
@@ -150,7 +169,14 @@ class Parser:
     def parse_arithmetic_factor(self) -> nodes.Node:
         factor = None
 
-        if self.check_then_consume(Token.types.OPEN_PARENTHESIS):
+        if self.check_then_consume(Token.types.QUOTATION):
+            characters = []
+
+            while not(self.check_then_consume(Token.types.QUOTATION)):
+                characters.append(self.get_then_consume().value)
+
+            factor = nodes.String_value(value="".join(characters))
+        elif self.check_then_consume(Token.types.OPEN_PARENTHESIS):
             factor = self.parse_boolean_expression()
 
             self.expect_then_consume(Token.types.CLOSE_PARENTHESIS)
@@ -243,10 +269,10 @@ class Parser:
         return False
 
     def expect_then_consume(self, type_: Token.types):
-        if self.check_then_consume(type_):
-            return
+        if self.check(type_):
+            return self.get_then_consume()
 
-        self.raise_unexpected_token(type_)
+        return self.raise_unexpected_token(type_)
 
     def raise_unexpected_token(self, expected: Token.types = None):
         if expected is not None:
