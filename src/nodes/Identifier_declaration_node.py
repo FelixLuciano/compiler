@@ -17,7 +17,7 @@ class Identifier_declaration_node(nodes.Node):
         elif type_str == "string":
             type_ = Typed_value.types.STRING
         else:
-            raise Exception(f"{type_str} is not an valid type!")
+            raise TypeError(f"{type_str} is not an valid type!")
 
         context.declare(self.value, type_)
 

@@ -30,7 +30,7 @@ class Typed_value:
         try:
             method = Typed_value.TRANSFORM_MAP[self.type][type_]
         except KeyError:
-            raise Exception(f"Couldn't transform {self.type.name} into {type_.name}")
+            raise TypeError(f"Couldn't transform {self.type.name} into {type_.name}")
 
         return Typed_value(
             type=type_,
