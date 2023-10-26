@@ -38,15 +38,16 @@ class Parser:
     def parse_statement(self, endl=True):
         statement = nodes.No_operation()
 
-        if self.check(Token.types.TYPE):
-            type_ = self.get_then_consume().value
+        if self.check_then_consume(Token.types.VAR_STATEMENT):
             name = self.expect_then_consume(Token.types.IDENTIFIER).value
 
             statement = nodes.Identifier_declaration(
                 value=name,
                 children=[
-                    nodes.String_value(type_)
-                ]
+                    nodes.String_value(
+                        value=self.expect_then_consume(Token.types.IDENTIFIER).value
+                    ),
+                ],
             )
 
             if self.check_then_consume(Token.types.ASSIGNMENT):

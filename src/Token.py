@@ -49,10 +49,10 @@ class Token:
         CLOSE_BRACES = auto()
         SEPARATOR = auto()
         HARD_SEPARATOR = auto()
+        VAR_STATEMENT = auto()
         IF_STATEMENT = auto()
         ELSE_STATEMENT = auto()
         FOR_STATEMENT = auto()
-        TYPE = auto()
 
         @classmethod
         def get(cls, value: str, is_eval: bool = False):
@@ -102,11 +102,10 @@ class Token:
                     "<": cls.OP_LOWER,
                     ">=": cls.OP_GREATER_EQUAL,
                     "<=": cls.OP_LOWER_EQUAL,
+                    "var": cls.VAR_STATEMENT,
                     "if": cls.IF_STATEMENT,
                     "else": cls.ELSE_STATEMENT,
                     "for": cls.FOR_STATEMENT,
-                    "int": cls.TYPE,
-                    "string": cls.TYPE,
                 }[value]
             except KeyError:
                 return None
