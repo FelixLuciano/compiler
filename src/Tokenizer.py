@@ -7,7 +7,7 @@ from src.Token import Token, LAMBDA, END_OF_FILE
 @dataclass
 class Tokenizer:
     source: str = field()
-    position: int = field(default=-1)
+    position: int = field(default=0)
     next: Token = field(init=False, default_factory=lambda: LAMBDA)
 
     def get(self, index):
