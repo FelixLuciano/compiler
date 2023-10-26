@@ -20,7 +20,10 @@ class Binary_operation_node(nodes.Node):
             method = Binary_operation_node.OPERATIONS[self.value]
 
             if x.type != y.type:
-                y = y.transform(x.type)
+                try:
+                    y = y.transform(x.type)
+                except TypeError:
+                    x = x.transform(y.type)
 
             return Typed_value(
                 type=x.type,
@@ -37,7 +40,7 @@ Binary_operation_node.OPERATIONS = {
     Token.types.OP_DIV: lambda x, y: x // y,
     Token.types.OP_MODULO: lambda x, y: x % y,
     Token.types.OP_POWER: lambda x, y: x ** y,
-    Token.types.OP_CONCAT: lambda x, y: "".join([x, y]),
+    Token.types.OP_CONCAT: lambda x, y: "".join(map(str, [x, y])),
     Token.types.OP_AND: lambda x, y: 1 if x and y else 0,
     Token.types.OP_OR: lambda x, y: 1 if x or y else 0,
     Token.types.OP_EQUAL: lambda x, y: 1 if x == y else 0,
