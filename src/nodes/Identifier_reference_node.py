@@ -1,12 +1,13 @@
+import typing as T
+from dataclasses import dataclass, field
+
 import src.nodes as nodes
 from src.SymbolTable import SymbolTable
 
 
+@dataclass
 class Identifier_reference_node(nodes.Node):
-    def evaluate(self, context: SymbolTable) -> int:
-        value = context.get(self.value)
+    value: str = field()
 
-        if isinstance(value, int):
-            return value
-
-        raise ValueError(f"{self.value} is not an valid reference!")
+    def evaluate(self, context: SymbolTable):
+        return context.get(self.value)
