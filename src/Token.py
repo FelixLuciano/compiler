@@ -32,6 +32,7 @@ class Token:
         OP_MODULO = auto()
         OP_POWER = auto()
         OP_FATORIAL = auto()
+        OP_CONCAT = auto()
         OP_AND = auto()
         OP_OR = auto()
         OP_NOT = auto()
@@ -41,6 +42,7 @@ class Token:
         OP_LOWER = auto()
         OP_GREATER_EQUAL = auto()
         OP_LOWER_EQUAL = auto()
+        QUOTATION = auto()
         OPEN_PARENTHESIS = auto()
         CLOSE_PARENTHESIS = auto()
         OPEN_BRACES = auto()
@@ -50,6 +52,7 @@ class Token:
         IF_STATEMENT = auto()
         ELSE_STATEMENT = auto()
         FOR_STATEMENT = auto()
+        TYPE = auto()
 
         @classmethod
         def get(cls, value: str, is_eval: bool = False):
@@ -59,7 +62,9 @@ class Token:
                 elif len(value) == 1:
                     if value == "\n":
                         return cls.END_OF_LINE
-                    if value in string.whitespace:
+                    elif value == "\"":
+                        return cls.QUOTATION
+                    elif value in string.whitespace:
                         return cls.SPACE
                     elif value in string.digits:
                         return cls.NUMBER
@@ -78,9 +83,10 @@ class Token:
                     "+": cls.OP_PLUS,
                     "-": cls.OP_MINUS,
                     "*": cls.OP_MULT,
-                    "**": cls.OP_POWER,
                     "/": cls.OP_DIV,
                     "%": cls.OP_MODULO,
+                    "**": cls.OP_POWER,
+                    ".": cls.OP_CONCAT,
                     "(": cls.OPEN_PARENTHESIS,
                     ")": cls.CLOSE_PARENTHESIS,
                     "{": cls.OPEN_BRACES,
@@ -99,6 +105,8 @@ class Token:
                     "if": cls.IF_STATEMENT,
                     "else": cls.ELSE_STATEMENT,
                     "for": cls.FOR_STATEMENT,
+                    "int": cls.TYPE,
+                    "string": cls.TYPE,
                 }[value]
             except KeyError:
                 return None
