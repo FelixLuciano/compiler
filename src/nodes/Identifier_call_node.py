@@ -11,7 +11,7 @@ class Identifier_call_node(nodes.Node):
 
     def evaluate(self, context: SymbolTable, program: Program):
         func, pointer = context.get(self.value)
-        args = (child.evaluate(context, program) for child in self.children)
+        args = [child.evaluate(context, program) for child in self.children]
 
         if self.value == "Scanln":
             program.write(

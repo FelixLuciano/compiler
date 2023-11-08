@@ -13,6 +13,6 @@ class Identifier_reference_node(nodes.Node):
     def evaluate(self, context: SymbolTable, program: Program):
         value, pointer = context.get(self.value)
 
-        program.write(f"MOV [EBP-{pointer+4}], EAX ; Recupera valor de {self.value}")
+        program.write(f"MOV EAX, [EBP-{pointer+4}] ; Recupera valor de {self.value}")
 
         return value

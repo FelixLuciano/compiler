@@ -16,9 +16,11 @@ class Iterator_block_node(nodes.Node):
 
         assignment.evaluate(context, program)
         program.write(loop_label_name + ":")
-
         condition.evaluate(context, program)
-        program.write(f"JNE {endloop_label_name}")
+        program.write(
+            f"CMP EAX, False",
+            f"JE {endloop_label_name}",
+        )
         block.evaluate(context, program)
         step.evaluate(context, program)
         program.write(
