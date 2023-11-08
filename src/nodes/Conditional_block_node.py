@@ -19,9 +19,9 @@ class Conditional_block_node(nodes.Node):
         # if Typed_value.is_true(value):
         self.children[1].evaluate(context, program)
         program.write(f"JMP {endif_label_name}")
-        # elif (len(self.children) > 2):
-        program.write(f"{else_label_name}:")
-        self.children[2].evaluate(context, program)
+        if (len(self.children) > 2):
+            program.write(f"{else_label_name}:")
+            self.children[2].evaluate(context, program)
         program.write(f"{endif_label_name}:")
 
         return Typed_value.NULL
