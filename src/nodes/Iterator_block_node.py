@@ -17,12 +17,10 @@ class Iterator_block_node(nodes.Node):
         assignment.evaluate(context, program)
         program.write(loop_label_name + ":")
 
-        while Typed_value.is_true(condition.evaluate(context, program)):
-            program.write(f"JNE {endloop_label_name}")
-            block.evaluate(context, program)
-            step.evaluate(context, program)
-            program.disable()
-        program.enable()
+        condition.evaluate(context, program)
+        program.write(f"JNE {endloop_label_name}")
+        block.evaluate(context, program)
+        step.evaluate(context, program)
         program.write(
             f"JMP {loop_label_name}",
             f"{endloop_label_name}:",
