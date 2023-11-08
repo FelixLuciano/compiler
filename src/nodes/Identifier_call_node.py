@@ -25,7 +25,7 @@ class Identifier_call_node(nodes.Node):
             program.write(
                 "PUSH EAX",
                 "PUSH formatout ; Formato int de saída",
-                "CAL printf",
+                "CALL printf",
                 "ADD ESP, 8 ; Remove os argumentos da pilha",
             )
 
