@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 
 from src.SymbolTable import SymbolTable, Typed_value
+from src.Program import Program
 
 
 @dataclass
@@ -20,5 +21,5 @@ class Abstract_node(ABC):
         return Abstract_node.i
 
     @abstractmethod
-    def evaluate(self, context: SymbolTable) -> Typed_value:
+    def evaluate(self, context: SymbolTable, program: Program) -> Typed_value:
         pass
