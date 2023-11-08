@@ -29,7 +29,7 @@ class Typed_value:
     def transform(self, type_: "types"):
         try:
             method = Typed_value.TRANSFORM_MAP[self.type][type_]
-        except KeyError:
+        except TypeError:
             raise TypeError(f"Couldn't transform {self.type.name} into {type_.name}")
 
         return Typed_value(
