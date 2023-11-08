@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 class Program:
     path: Path = field()
     can_write: bool = field(default=True, init=False, repr=False)
+    ident_width: int = field(default=0, init=False, repr=False)
 
     def __post_init__(self):
         self.clear()
@@ -21,10 +22,16 @@ class Program:
     def disable(self):
         self.can_write = False
 
+    def indent(self):
+        self.ident_width += 4
+
+    def unindent(self):
+        self.ident_width -= 4
+
     def write(self, *text: str) -> None:
         if self.can_write:
             with open(self.path, "at", encoding="utf-8") as f:
-                f.writelines((line + "\n" for line in text))
+                f.writelines((" "* self.ident_width + line + "\n" for line in text))
 
     def build_header(self):
         self.write(

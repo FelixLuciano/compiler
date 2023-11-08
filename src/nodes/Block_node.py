@@ -10,7 +10,11 @@ class Block_node(nodes.Node):
     value: None = field(default=None)
 
     def evaluate(self, context: SymbolTable, program: Program):
+        program.indent()
+
         for child in self.children:
             child.evaluate(context, program)
+
+        program.unindent()
 
         return Typed_value.NULL
