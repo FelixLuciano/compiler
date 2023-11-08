@@ -10,9 +10,11 @@ class Conditional_block_node(nodes.Node):
     value: None = field(default=None)
 
     def evaluate(self, context: SymbolTable, program: Program):
+        program.write(f"IF_{self.id}:")
+
         value: Typed_value = self.children[0].evaluate(context, program)
-        else_label_name = f"LOOP_{self.id}"
-        endif_label_name = f"ENDLOOP_{self.id}"
+        else_label_name = f"ELSE_{self.id}"
+        endif_label_name = f"ENDIF_{self.id}"
 
         if Typed_value.is_true(value):
             self.children[1].evaluate(context, program)

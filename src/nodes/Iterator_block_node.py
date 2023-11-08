@@ -10,7 +10,6 @@ class Iterator_block_node(nodes.Node):
     value: None = field(default=None)
 
     def evaluate(self, context: SymbolTable, program: Program):
-        print(f"ITER", self.id)
         assignment, condition, step, block = self.children
         loop_label_name = f"LOOP_{self.id}"
         endloop_label_name = f"ENDLOOP_{self.id}"
