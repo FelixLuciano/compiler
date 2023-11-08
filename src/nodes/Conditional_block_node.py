@@ -11,8 +11,8 @@ class Conditional_block_node(nodes.Node):
 
     def evaluate(self, context: SymbolTable, program: Program):
         value: Typed_value = self.children[0].evaluate(context, program)
-        else_label_name = f"LOOP_{self.i}"
-        endif_label_name = f"ENDLOOP_{self.i}"
+        else_label_name = f"LOOP_{self.id}"
+        endif_label_name = f"ENDLOOP_{self.id}"
 
         if Typed_value.is_true(value):
             self.children[1].evaluate(context, program)
