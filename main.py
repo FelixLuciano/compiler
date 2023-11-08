@@ -12,9 +12,6 @@ def main(args: argparse.Namespace):
     with open(args.entry, "r") as entry:
         code = entry.read()
 
-    if args.entry == "teste1.go":
-        print(code)
-
     context = SymbolTable()
     program = Program(filename)
     expression = Parser.run(code)

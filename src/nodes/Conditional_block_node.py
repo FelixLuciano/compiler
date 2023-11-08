@@ -16,12 +16,12 @@ class Conditional_block_node(nodes.Node):
         else_label_name = f"ELSE_{self.id}"
         endif_label_name = f"ENDIF_{self.id}"
 
-        if Typed_value.is_true(value):
-            self.children[1].evaluate(context, program)
-            program.write(f"JMP {endif_label_name}")
-        elif (len(self.children) > 2):
-            program.write(f"{else_label_name}:")
-            self.children[2].evaluate(context, program)
+        # if Typed_value.is_true(value):
+        self.children[1].evaluate(context, program)
+        program.write(f"JMP {endif_label_name}")
+        # elif (len(self.children) > 2):
+        program.write(f"{else_label_name}:")
+        self.children[2].evaluate(context, program)
         program.write(f"{endif_label_name}:")
 
         return Typed_value.NULL
