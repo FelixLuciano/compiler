@@ -57,6 +57,46 @@ class Parser:
                         self.parse_expression()
                     ]
                 ))
+        if self.check_then_consume(Token.types.FUNC_STATEMENT):            
+            name = self.expect_then_consume(Token.types.IDENTIFIER).value
+            arguments = []
+
+            self.expect_then_consume(Token.types.OPEN_PARENTHESIS)
+
+            while self.check_then_consume(Token.types.SEPARATOR):
+                arguments.append(nodes.Identifier_declaration(
+                    value=self.expect_then_consume(Token.types.IDENTIFIER).value,
+                    children=[
+                        nodes.String_value(
+                            value=self.expect_then_consume(Token.types.IDENTIFIER).value,
+                        ),
+                    ],
+                ))
+
+            self.expect_then_consume(Token.types.CLOSE_PARENTHESIS)
+
+            return_type = self.expect_then_consume(Token.types.IDENTIFIER).value
+
+            arguments.append(self.parse_block())
+
+            return nodes.Identifier_declaration(
+                value=name,
+                children=[
+                    nodes.String_value(
+                        value=return_type,
+                    ),
+                    nodes.Identifier_assignment(
+                        value=name,
+                        children = [
+                            nodes.Function(
+                                value=None,
+                                children=arguments,
+                            ),
+                        ]
+                    ),
+                ],
+            )
+
         if self.check_then_consume(Token.types.IF_STATEMENT):
             children = [self.parse_expression(), self.parse_block()]
 
@@ -82,6 +122,13 @@ class Parser:
                     condition,
                     step,
                     block,
+                ],
+            )
+        if self.check_then_consume(Token.types.RETURN_STATEMENT):
+            statement = nodes.Return(
+                value=None,
+                children=[
+                    self.parse_expression()
                 ],
             )
         elif not self.check(Token.types.END_OF_LINE):
@@ -180,7 +227,7 @@ class Parser:
 
                 characters.append(self.get_then_consume().value)
 
-            factor = nodes.String_value(value="".join(characters))
+            factor = nodes.String_value(value=" ".join(characters))
         elif self.check_then_consume(Token.types.OPEN_PARENTHESIS):
             factor = self.parse_boolean_expression()
 

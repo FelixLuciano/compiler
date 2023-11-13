@@ -9,7 +9,6 @@ class Typed_value:
         NULL = auto()
         INT = auto()
         STRING = auto()
-        FUNCTION = auto()
 
     type: types = field()
     value: T.Any = field()

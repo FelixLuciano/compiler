@@ -10,6 +10,9 @@ class Block_node(nodes.Node):
 
     def evaluate(self, context: SymbolTable):
         for child in self.children:
-            child.evaluate(context)
+            value = child.evaluate(context)
+
+            if isinstance(child, nodes.Return):
+                return value
 
         return Typed_value.NULL
