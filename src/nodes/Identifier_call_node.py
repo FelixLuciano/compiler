@@ -15,7 +15,12 @@ class Identifier_call_node(nodes.Node):
         if isinstance(func.value, nodes.Function):
             child_context = func.value.before_evaluate(context, *args)
 
-            return func.value.evaluate(child_context)
+            value =  func.value.evaluate(child_context)
+
+            if value.type != func.type:
+                raise TypeError(f"Function of type {func.type.name} cannot return type {value.type.name}!")
+
+            return value
         elif callable(func.value):
             return func.value(*args)
 
