@@ -33,6 +33,8 @@ class Parser:
 
             statements.append(statement)
 
+        statements.append(nodes.Identifier_call("main"))
+
         return nodes.Block(None, statements)
 
     def parse_statement(self, endl=True):
@@ -63,15 +65,19 @@ class Parser:
 
             self.expect_then_consume(Token.types.OPEN_PARENTHESIS)
 
-            while self.check_then_consume(Token.types.SEPARATOR):
-                arguments.append(nodes.Identifier_declaration(
-                    value=self.expect_then_consume(Token.types.IDENTIFIER).value,
-                    children=[
-                        nodes.String_value(
-                            value=self.expect_then_consume(Token.types.IDENTIFIER).value,
-                        ),
-                    ],
-                ))
+            while True:
+                if self.check(Token.types.IDENTIFIER):
+                    arguments.append(nodes.Identifier_declaration(
+                        value=self.get_then_consume().value,
+                        children=[
+                            nodes.String_value(
+                                value=self.expect_then_consume(Token.types.IDENTIFIER).value,
+                            ),
+                        ],
+                    ))
+                 
+                if not self.check_then_consume(Token.types.SEPARATOR):
+                    break
 
             self.expect_then_consume(Token.types.CLOSE_PARENTHESIS)
 
