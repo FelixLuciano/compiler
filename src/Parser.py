@@ -108,6 +108,8 @@ class Parser:
 
             if self.check_then_consume(Token.types.ELSE_STATEMENT):
                 children.append(self.parse_block())
+            else:
+                self.expect(Token.types.END_OF_LINE)
 
             statement = nodes.Conditional_block(
                 value=None,
