@@ -6,7 +6,7 @@ from src.Typed_value import Typed_value
 
 @dataclass
 class SymbolTable:
-    table: T.Dict[str, Typed_value] = field(default_factory=dict)
+    table: T.Dict[str, T.Tuple[Typed_value, int]] = field(default_factory=dict)
     parent: T.Optional["SymbolTable"] = field(default=None)
 
     RESERVED: T.Dict[str, Typed_value] = field(
@@ -20,6 +20,8 @@ class SymbolTable:
         }
     )
 
+    stack_pointer: int = 0
+
     def declare(self, identifier: str, type_: Typed_value.types) -> None:
         if identifier in self.RESERVED:
             raise KeyError(
@@ -30,22 +32,25 @@ class SymbolTable:
                 f"{identifier} couldn't be declared because it is was already declared!"
             )
 
-        self.table[identifier] = Typed_value(type_, None)
+        self.table[identifier] = (Typed_value(type_, None), SymbolTable.stack_pointer)
+
+        SymbolTable.stack_pointer += 4
 
     def set(self, identifier: str, value: Typed_value) -> None:
         if identifier not in self.table:
             raise KeyError(f"{identifier} as not declared!")
     
-        type_ = self.table[identifier].type
-        
+        type_= self.table[identifier][0].type
+        pointer = self.table[identifier][1]
+
         if (value.type != type_):
             raise KeyError(f"Couldn't assign {value.type.name} into an {type_.name} variable!")
 
-        self.table[identifier] = value
+        self.table[identifier] = (value, pointer)
 
-    def get(self, identifier: str) -> Typed_value:
+    def get(self, identifier: str) -> T.Tuple[Typed_value, int]:
         if identifier in self.RESERVED:
-            return self.RESERVED[identifier]
+            return (self.RESERVED[identifier], -1)
         elif identifier in self.table:
             return self.table[identifier]
         elif self.parent is not None:

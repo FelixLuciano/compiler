@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from src.Token import Token
 import src.nodes as nodes
 from src.SymbolTable import SymbolTable, Typed_value
+from src.Program import Program
 
 
 @dataclass
@@ -12,9 +13,57 @@ class Binary_operation_node(nodes.Node):
 
     OPERATIONS: T.Dict[Token.types, T.Callable[[T.Any, T.Any], T.Any]] = field(init=False, repr=False)
 
-    def evaluate(self, context: SymbolTable):
+    def evaluate(self, context: SymbolTable, program: Program):
         a, b = self.children
-        x, y = a.evaluate(context), b.evaluate(context)
+        y = b.evaluate(context, program)
+
+        program.write("PUSH EAX")
+
+        x = a.evaluate(context, program)
+
+        program.write("POP EBX")
+
+        if self.value == Token.types.OP_PLUS:
+            program.write("ADD EAX, EBX")
+        elif self.value == Token.types.OP_MINUS:
+            program.write("SUB EAX, EBX")
+        elif self.value == Token.types.OP_MULT:
+            program.write("IMUL EAX, EBX")
+        elif self.value == Token.types.OP_DIV:
+            program.write("IDIV EBX")
+
+        elif self.value == Token.types.OP_EQUAL:
+            program.write(
+                "CMP EAX, EBX",
+                "CALL binop_je",
+            )
+        elif self.value == Token.types.OP_NOT_EQUAL:
+            program.write(
+                "CMP EAX, EBX",
+                "CALL binop_je",
+            )
+        elif self.value == Token.types.OP_GREATER:
+            program.write(
+                "CMP EAX, EBX",
+                "CALL binop_jg",
+            )
+        elif self.value == Token.types.OP_GREATER_EQUAL:
+            program.write(
+                "CMP EAX, EBX",
+                "CALL binop_jl",
+                "CMP EAX, False",
+            )
+        elif self.value == Token.types.OP_LOWER:
+            program.write(
+                "CMP EAX, EBX",
+                "CALL binop_jl",
+            )
+        elif self.value == Token.types.OP_LOWER_EQUAL:
+            program.write(
+                "CMP EAX, EBX",
+                "CALL binop_jg",
+                "CMP EAX, False",
+            )
 
         try:
             method = Binary_operation_node.OPERATIONS[self.value]
