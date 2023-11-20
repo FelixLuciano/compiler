@@ -184,7 +184,7 @@
     ╰───╯│┌─────────────────┐     │╰───╯
          ┼┤ EXPRESSION_LIST ├─ -> │
           └─────────────────┘
-          
+
 ```
 
 ### `EXPRESSION_LIST`
@@ -204,7 +204,6 @@
 </summary>
 
 ```txt
-
 DIGIT                   = ( 0-9 ) ;
 LETTER                  = ( a-z | A-Z ) ;
 ENDL                    = ( \n ) ;
