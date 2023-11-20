@@ -13,7 +13,10 @@ class Block_node(nodes.Node):
         program.indent()
 
         for child in self.children:
-            child.evaluate(context, program)
+            value = child.evaluate(context, program)
+
+            if isinstance(child, nodes.Return):
+                return value
 
         program.unindent()
 

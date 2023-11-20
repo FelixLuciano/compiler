@@ -7,6 +7,7 @@ from src.Typed_value import Typed_value
 @dataclass
 class SymbolTable:
     table: T.Dict[str, T.Tuple[Typed_value, int]] = field(default_factory=dict)
+    parent: T.Optional["SymbolTable"] = field(default=None)
 
     RESERVED: T.Dict[str, Typed_value] = field(
         init=False,
@@ -14,8 +15,8 @@ class SymbolTable:
         default_factory=lambda: {
             "false": Typed_value(Typed_value.types.INT, 0),
             "true": Typed_value(Typed_value.types.INT, 1),
-            "Println": Typed_value(Typed_value.types.FUNCTION, lambda *args: print(*(arg.value for arg in args))),
-            "Scanln": Typed_value(Typed_value.types.FUNCTION, lambda: Typed_value(Typed_value.types.INT, int(input("")))),
+            "Println": Typed_value(Typed_value.types.NULL, lambda *args: print(*(arg.value for arg in args))),
+            "Scanln": Typed_value(Typed_value.types.INT, lambda: Typed_value(Typed_value.types.INT, int(input("")))),
         }
     )
 
@@ -52,5 +53,7 @@ class SymbolTable:
             return (self.RESERVED[identifier], -1)
         elif identifier in self.table:
             return self.table[identifier]
+        elif self.parent is not None:
+            return self.parent.get(identifier)
         else:
             raise ValueError(f"{identifier} was not assigned.")

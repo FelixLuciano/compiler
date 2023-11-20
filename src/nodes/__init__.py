@@ -1,6 +1,7 @@
 from .Abstract_node import Abstract_node as Node
 from .Binary_operation_node import Binary_operation_node as Binary_operation
 from .Block_node import Block_node as Block
+from .Function_node import Function_node as Function
 from .Conditional_block_node import Conditional_block_node as Conditional_block
 from .Identifier_assignment_node import Identifier_assignment_node as Identifier_assignment
 from .Identifier_call_node import Identifier_call_node as Identifier_call
@@ -9,5 +10,6 @@ from .Identifier_reference_node import Identifier_reference_node as Identifier_r
 from .Integer_value_node import Integer_value_node as Integer_value
 from .Iterator_block_node import Iterator_block_node as Iterator_block
 from .No_operation_node import No_operation_node as No_operation
+from .Return_node import Return_node as Return
 from .String_value_node import String_value_node as String_value
 from .Unary_operation_node import Unary_operation_node as Unary_operation
